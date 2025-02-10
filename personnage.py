@@ -22,7 +22,6 @@ walking_gauche = ['Sprites/PersoWalking1.png',
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.isMoving = False
         self.on_ground = True
         self.speed = 8
         self.jump_max = -12
@@ -37,12 +36,22 @@ class Player(pygame.sprite.Sprite):
         self.direction = 1
 
     #Déplacement vers la droite du personnage
-    def move_right(self):
+    def move_right(self,platforms):
         self.rect.x += self.speed
 
+        # Gestion des collisions
+        for platform in platforms:
+            if self.rect.colliderect(platform):
+                self.rect.right = platform.left
+
     #Déplacement vers la gauche du personnage
-    def move_left(self):
+    def move_left(self,platforms):
         self.rect.x -= self.speed
+
+        #Gestion des collisions
+        for platform in platforms:
+            if self.rect.colliderect(platform):
+                self.rect.left = platform.right
 
     def jump(self):
         if self.on_ground:
@@ -57,10 +66,15 @@ class Player(pygame.sprite.Sprite):
         # Vérifier les collisions avec les plateformes
         self.on_ground = False
         for platform in platforms:
-            if self.rect.colliderect(platform) and self.saut > 0:
-                self.rect.bottom = platform[1]  # Corrige la position
-                self.saut = 0  # Stoppe la chute
-                self.on_ground = True
+
+            if self.rect.colliderect(platform):
+                if self.saut > 0:  # Collision en tombant
+                    self.rect.bottom = platform.top
+                    self.saut = 0
+                    self.on_ground = True
+                elif self.saut < 0:  # Collision en sautant
+                    self.rect.top = platform.bottom
+                    self.saut = 0
 
 
     # Animation du personnage

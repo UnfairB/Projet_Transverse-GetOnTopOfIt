@@ -8,6 +8,7 @@ NOIR = (0,0,0)
 BLEU = (0,0,255)
 VERT = (0,255,0)
 ROUGE = (255,0,0)
+MARRON = (165,42,42)
 
 #Dimension de l'écran
 LARGEUR = 720
@@ -35,24 +36,28 @@ while running:
     screen.fill(BLANC)
 
     # Plateformes
-    platforms = [(0, 550, 1280, 20),
-                 (800,500,200,20),
-                 (400,400,200,20),
-                 (50,300,200,20)]
-    for plateforme in platforms:
-        pygame.draw.rect(screen, VERT, plateforme)
+    platforms = [
+                 pygame.draw.rect(screen, VERT,(0, 550, 1280, 20)),
+                 pygame.draw.rect(screen, MARRON, (0, 570, 1280, 200)),
+                 pygame.draw.rect(screen, VERT,(800,500,200,50)),
+                 pygame.draw.rect(screen, VERT,(400,400,200,50)),
+                 pygame.draw.rect(screen, VERT,(50,300,200,50)),
+                 pygame.draw.rect(screen, NOIR, (1260, 0, 20, 720)),
+                 pygame.draw.rect(screen, NOIR, (0, 0, 20, 720)),
+    ]
 
     # Afficher le personnage
+    screen.blit(jeu.javelot.image,jeu.javelot.rect)
     screen.blit(jeu.perso.image, jeu.perso.rect)
 
     #Déplace le joueur à gauche ou à droite en fonction de la touche pressé
     if jeu.pressed.get(pygame.K_RIGHT):
-        jeu.perso.move_right()
+        jeu.perso.move_right(platforms)
 
     if jeu.pressed.get(pygame.K_LEFT):
-        jeu.perso.move_left()
+        jeu.perso.move_left(platforms)
 
-    if jeu.pressed.get(pygame.K_SPACE) and jeu.perso.on_ground:
+    if jeu.pressed.get(pygame.K_UP) and jeu.perso.on_ground:
         jeu.perso.jump()
 
     for event in pygame.event.get():
