@@ -63,6 +63,9 @@ while running:
     if jeu.pressed.get(pygame.K_SPACE) and jeu.perso.on_ground:
         jeu.perso.jump()
 
+    if jeu.pressed.get(pygame.MOUSEBUTTONUP) and jeu.javelot.IsThrown == False:
+        jeu.javelot.lancer_javelot()
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -75,6 +78,14 @@ while running:
 
     jeu.perso.maj(keys)
     jeu.perso.saut_maj(platforms)
+
+
+    # Récupérer la position de la souris
+    mouse_x, mouse_y = pygame.mouse.get_pos()
+
+    # Dessiner le viseur (un cercle rouge)
+    pygame.draw.circle(screen, ROUGE, (mouse_x, mouse_y), 10, 2)  # Cercle avec bordure
+
     #Met à jour l'affichage (60 frames par secondes)
     pygame.display.update()
     clock.tick(60)
