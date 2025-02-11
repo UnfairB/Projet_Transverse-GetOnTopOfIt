@@ -23,8 +23,8 @@ class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
         self.on_ground = True
-        self.speed = 8
-        self.jump_max = -12
+        self.speed = 6
+        self.jump_max = -10
         self.saut = 0
         self.gravity = 0.5
         self.frame = 0
@@ -79,7 +79,7 @@ class Player(pygame.sprite.Sprite):
 
     # Animation du personnage
     def maj(self, keys):
-        if keys[pygame.K_LEFT]:
+        if keys[pygame.K_q]:
             self.frame_counter += 1
             if self.frame_counter >= 6:
                 self.frame_counter = 0
@@ -89,7 +89,7 @@ class Player(pygame.sprite.Sprite):
                 if self.frame >= len(walking_gauche):
                     self.frame = 0
                     self.frame_counter = 0
-        elif keys[pygame.K_RIGHT]:
+        elif keys[pygame.K_d]:
             self.frame_counter += 1
             if self.frame_counter >= 6:
                 self.frame_counter = 0

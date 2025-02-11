@@ -24,6 +24,9 @@ clock = pygame.time.Clock()
 # Charger notre jeu
 jeu = Game()
 
+# Cacher le curseur de la souris
+pygame.mouse.set_visible(False)
+
 #Boucle du jeu
 running = True
 
@@ -39,9 +42,9 @@ while running:
     platforms = [
                  pygame.draw.rect(screen, VERT,(0, 550, 1280, 20)),
                  pygame.draw.rect(screen, MARRON, (0, 570, 1280, 200)),
-                 pygame.draw.rect(screen, VERT,(800,500,200,50)),
-                 pygame.draw.rect(screen, VERT,(400,400,200,50)),
-                 pygame.draw.rect(screen, VERT,(50,300,200,50)),
+                 pygame.draw.rect(screen, VERT,(1080,400,200,150)),
+                 pygame.draw.rect(screen, VERT,(650,350,200,50)),
+                 pygame.draw.rect(screen, VERT,(250,300,200,50)),
                  pygame.draw.rect(screen, NOIR, (1260, 0, 20, 720)),
                  pygame.draw.rect(screen, NOIR, (0, 0, 20, 720)),
     ]
@@ -51,13 +54,13 @@ while running:
     screen.blit(jeu.perso.image, jeu.perso.rect)
 
     #Déplace le joueur à gauche ou à droite en fonction de la touche pressé
-    if jeu.pressed.get(pygame.K_RIGHT):
+    if jeu.pressed.get(pygame.K_d):
         jeu.perso.move_right(platforms)
 
-    if jeu.pressed.get(pygame.K_LEFT):
+    if jeu.pressed.get(pygame.K_q):
         jeu.perso.move_left(platforms)
 
-    if jeu.pressed.get(pygame.K_UP) and jeu.perso.on_ground:
+    if jeu.pressed.get(pygame.K_SPACE) and jeu.perso.on_ground:
         jeu.perso.jump()
 
     for event in pygame.event.get():
