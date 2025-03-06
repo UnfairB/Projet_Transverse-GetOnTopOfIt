@@ -1,7 +1,6 @@
 import pygame
 import math
 
-
 class Spear(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()

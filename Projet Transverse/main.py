@@ -12,7 +12,7 @@ MARRON = (165,42,42)
 
 #Dimension de l'écran
 LARGEUR = 720
-LONGUEUR = 1280
+LONGUEUR = 1080
 
 #Initialisation de la fenêtre
 pygame.init()
@@ -26,6 +26,9 @@ jeu = Game()
 
 # Cacher le curseur de la souris
 pygame.mouse.set_visible(False)
+
+#Variable qui va gérer nos différentes scène du jeu
+scene_actu = 1
 
 #Boucle du jeu
 running = True
@@ -41,17 +44,20 @@ while running:
     # Plateformes
     platforms = [
             pygame.draw.rect(screen, ROUGE, (2000,2000, 64, 10)),
-            pygame.draw.rect(screen, VERT,(0, 550, 1280, 20)),
-            pygame.draw.rect(screen, MARRON, (0, 570, 1280, 200)),
-            pygame.draw.rect(screen, VERT,(1080,400,200,150)),
-            pygame.draw.rect(screen, VERT,(650,350,200,50)),
-            pygame.draw.rect(screen, VERT,(250,300,200,50)),
-            pygame.draw.rect(screen, NOIR, (1260, 0, 20, 720)),
-            pygame.draw.rect(screen, NOIR, (0, 0, 20, 720)),
+            pygame.draw.rect(screen, VERT,(0, 550, 1080, 20)),
+            pygame.draw.rect(screen, MARRON, (0, 570, 1080, 200)),
+            pygame.draw.rect(screen, VERT,(0,0,300,400)),
+            pygame.draw.rect(screen, VERT,(300,0,500,450)),
+            pygame.draw.rect(screen, VERT,(0,400,20,150)),
+            pygame.draw.rect(screen, VERT, (1060, 0, 20, 550)),
+            pygame.draw.rect(screen, VERT, (1000, 475, 105, 75)),
+            pygame.draw.rect(screen, VERT, (800, 400, 75, 50)),
+            #pygame.draw.rect(screen, NOIR, (1060, 0, 20, 720)),
+            #pygame.draw.rect(screen, NOIR, (0, 0, 20, 720)),
     ]
 
     if jeu.javelot.IsPlatform:
-        platforms[0] = pygame.draw.rect(screen, ROUGE, (jeu.javelot.rect.x, jeu.javelot.rect.y + 28, 64, 3))
+        platforms[0] = pygame.draw.rect(screen, ROUGE, (jeu.javelot.rect.x, jeu.javelot.rect.y, 64, 3))
     else:
         platforms[0] = pygame.draw.rect(screen, ROUGE, (2000,2000, 64, 10))
 

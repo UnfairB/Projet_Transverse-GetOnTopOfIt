@@ -1,6 +1,7 @@
 import pygame
 from personnage import Player
 from javelot import Spear
+from scene import Tiles
 
 #Classe qui va représenter notre jeu
 class Game:
