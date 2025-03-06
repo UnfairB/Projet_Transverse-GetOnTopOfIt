@@ -23,7 +23,7 @@ class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
         self.on_ground = True
-        self.speed = 6
+        self.speed = 7
         self.jump_max = -10
         self.saut = 0
         self.gravity = 0.5
@@ -31,7 +31,7 @@ class Player(pygame.sprite.Sprite):
         self.frame_counter = 0
         self.image = pygame.image.load('Sprites/PersoIdleDroite.png')
         self.rect = self.image.get_rect()
-        self.rect.x = 500
+        self.rect.x = 100
         self.rect.y = 500
         self.direction = 1
 
@@ -75,7 +75,6 @@ class Player(pygame.sprite.Sprite):
                 elif self.saut < 0:  # Collision en sautant
                     self.rect.top = platform.bottom
                     self.saut = 0
-
 
     # Animation du personnage
     def maj(self, keys):
