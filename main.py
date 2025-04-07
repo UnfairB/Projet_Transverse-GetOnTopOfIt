@@ -16,8 +16,8 @@ LONGUEUR = 1080
 
 #Initialisation de la fenêtre
 pygame.init()
-pygame.display.set_caption('Projet Transverse')
 
+pygame.display.set_caption('GetOnTop of It')
 screen = pygame.display.set_mode((LONGUEUR, LARGEUR))
 clock = pygame.time.Clock()
 
@@ -52,8 +52,6 @@ while running:
             pygame.draw.rect(screen, VERT, (1060, 0, 20, 550)),
             pygame.draw.rect(screen, VERT, (1000, 475, 105, 75)),
             pygame.draw.rect(screen, VERT, (800, 400, 75, 50)),
-            #pygame.draw.rect(screen, NOIR, (1060, 0, 20, 720)),
-            #pygame.draw.rect(screen, NOIR, (0, 0, 20, 720)),
     ]
 
     if jeu.javelot.IsPlatform:

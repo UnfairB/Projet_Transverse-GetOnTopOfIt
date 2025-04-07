@@ -20,11 +20,10 @@ class Maitresse:
         self.clock = pygame.time.Clock()
 
         self.gameStateManager = GameStateManager('accueil')
-        self.start = Start(self.screen,self.gameStateManager)
         self.level = Level(self.screen,self.gameStateManager)
         self.accueil = Menu(self.screen,self.gameStateManager)
 
-        self.states = {'start':self.start,'level':self.level,'accueil':self.accueil}
+        self.states = {'level':self.level,'accueil':self.accueil}
     def run(self):
         while True:
             for event in pygame.event.get():
@@ -45,21 +44,6 @@ class Level:
 
     def run(self):
         self.display.fill('blue')
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_e]:
-            self.gameStateManager.set_state('start')
-#########################################################
-#########################################################
-class Start:
-    def __init__(self,display,gameStateManager):
-        self.display = display
-        self.gameStateManager = gameStateManager
-
-    def run(self):
-        self.display.fill('red')
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_SPACE]:
-            self.gameStateManager.set_state('level')
 #########################################################
 
 class GameStateManager:
