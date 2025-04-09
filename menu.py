@@ -30,7 +30,7 @@ class Menu:
         if button_rect.collidepoint(mouse_pos):
             pygame.draw.rect(self.display, 'green', button_rect)
             if mouse_click[0]:
-                self.gameStateManager.set_state('level')
+                self.gameStateManager.set_state('spawn')
         else:
             pygame.draw.rect(self.display, 'blue', button_rect)
 

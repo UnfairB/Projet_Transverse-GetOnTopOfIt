@@ -7,11 +7,12 @@ Created on Sat Sep 21 21:58:26 2024
 import pygame
 import sys
 from menu import Menu
+from map import Map
 
 FPS = 60
 
-LARGEUR = 720
-LONGUEUR = 1080
+LARGEUR = 736
+LONGUEUR = 1088
 
 class Maitresse:
     def __init__(self):
@@ -20,10 +21,11 @@ class Maitresse:
         self.clock = pygame.time.Clock()
 
         self.gameStateManager = GameStateManager('accueil')
-        self.level = Level(self.screen,self.gameStateManager)
+        self.spawn = Map(self.screen,self.gameStateManager,'TileMap/zone0.tmx')
         self.accueil = Menu(self.screen,self.gameStateManager)
 
-        self.states = {'level':self.level,'accueil':self.accueil}
+        self.states = {'accueil':self.accueil,'spawn':self.spawn}
+
     def run(self):
         while True:
             for event in pygame.event.get():
@@ -31,20 +33,15 @@ class Maitresse:
                     pygame.quit()
                     sys.exit()
 
-            self.states[self.gameStateManager.get_state()].run()
+            #self.states[self.gameStateManager.get_state()].run()
+            current_state = self.states[self.gameStateManager.get_state()]
+            if isinstance(current_state, Map):
+                current_state.run(self.screen)
+            else:
+                current_state.run()
 
             pygame.display.update()
             self.clock.tick(FPS)
-
-#########################################################
-class Level:
-    def __init__(self,display,gameStateManager):
-        self.display = display
-        self.gameStateManager = gameStateManager
-
-    def run(self):
-        self.display.fill('blue')
-#########################################################
 
 class GameStateManager:
     def __init__(self,currentState):
