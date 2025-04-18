@@ -1,107 +1,56 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Sep 21 21:58:26 2024
+
+@author: tomyj
+"""
 import pygame
 import sys
-from jeu import Game
+from menu import Menu
+from map import Map
 
-#Couleur
-BLANC = (255,255,255)
-NOIR = (0,0,0)
-BLEU = (0,0,255)
-VERT = (0,255,0)
-ROUGE = (255,0,0)
-MARRON = (165,42,42)
+FPS = 60
 
-#Dimension de l'écran
-LARGEUR = 720
-LONGUEUR = 1080
+LARGEUR = 736
+LONGUEUR = 1088
 
-#Initialisation de la fenêtre
-pygame.init()
+class Maitresse:
+    def __init__(self):
+        pygame.init()
+        self.screen = pygame.display.set_mode((LONGUEUR, LARGEUR))
+        self.clock = pygame.time.Clock()
 
-pygame.display.set_caption('GetOnTop of It')
-screen = pygame.display.set_mode((LONGUEUR, LARGEUR))
-clock = pygame.time.Clock()
+        self.gameStateManager = GameStateManager('accueil')
+        self.spawn = Map(self.screen,self.gameStateManager,'TileMap/zone0.tmx')
+        self.accueil = Menu(self.screen,self.gameStateManager)
 
-# Charger notre jeu
-jeu = Game()
+        self.states = {'accueil':self.accueil,'spawn':self.spawn}
 
-# Cacher le curseur de la souris
-pygame.mouse.set_visible(False)
+    def run(self):
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
 
-#Variable qui va gérer nos différentes scène du jeu
-scene_actu = 1
+            #self.states[self.gameStateManager.get_state()].run()
+            current_state = self.states[self.gameStateManager.get_state()]
+            if isinstance(current_state, Map):
+                current_state.run(self.screen)
+            else:
+                current_state.run()
 
-#Boucle du jeu
-running = True
+            pygame.display.update()
+            self.clock.tick(FPS)
 
-while running:
+class GameStateManager:
+    def __init__(self,currentState):
+        self.currentState = currentState
+    def get_state(self):
+        return self.currentState
+    def set_state(self,state):
+        self.currentState = state
 
-    # Détection des touches pressées
-    keys = pygame.key.get_pressed()
-
-    # Image de fond (provisoire)
-    screen.fill(BLANC)
-
-    # Plateformes
-    platforms = [
-            pygame.draw.rect(screen, ROUGE, (2000,2000, 64, 10)),
-            pygame.draw.rect(screen, VERT,(0, 550, 1080, 20)),
-            pygame.draw.rect(screen, MARRON, (0, 570, 1080, 200)),
-            pygame.draw.rect(screen, VERT,(0,0,300,400)),
-            pygame.draw.rect(screen, VERT,(300,0,500,450)),
-            pygame.draw.rect(screen, VERT,(0,400,20,150)),
-            pygame.draw.rect(screen, VERT, (1060, 0, 20, 550)),
-            pygame.draw.rect(screen, VERT, (1000, 475, 105, 75)),
-            pygame.draw.rect(screen, VERT, (800, 400, 75, 50)),
-    ]
-
-    if jeu.javelot.IsPlatform:
-        platforms[0] = pygame.draw.rect(screen, ROUGE, (jeu.javelot.rect.x, jeu.javelot.rect.y, 64, 3))
-    else:
-        platforms[0] = pygame.draw.rect(screen, ROUGE, (2000,2000, 64, 10))
-
-
-    # Récupérer la position de la souris
-    mouse_x, mouse_y = pygame.mouse.get_pos()
-
-    # Afficher les sprites
-    screen.blit(jeu.javelot.image,jeu.javelot.rect)
-    screen.blit(jeu.perso.image,jeu.perso.rect)
-
-    #Déplace le joueur à gauche ou à droite en fonction de la touche pressé
-    if jeu.pressed.get(pygame.K_d):
-        jeu.perso.move_right(platforms)
-
-    if jeu.pressed.get(pygame.K_q):
-        jeu.perso.move_left(platforms)
-
-    if jeu.pressed.get(pygame.K_SPACE) and jeu.perso.on_ground:
-        jeu.perso.jump()
-
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-
-        # Déplacement du personnage
-        if event.type == pygame.KEYDOWN:
-            jeu.pressed[event.key] = True
-        if event.type == pygame.KEYUP:
-            jeu.pressed[event.key] = False
-        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-            if not jeu.javelot.IsThrown:# 1 = clic gauche
-                mouse_x, mouse_y = pygame.mouse.get_pos()
-                jeu.javelot.lancer_javelot(jeu.perso.rect.x, jeu.perso.rect.y, mouse_x, mouse_y)
-
-    #Mise à jour des frames du jeu
-    jeu.perso.maj(keys)
-    jeu.perso.saut_maj(platforms)
-    jeu.javelot.javelot_maj(jeu.perso.rect.x, jeu.perso.rect.y,platforms)
-
-    # Dessiner le viseur (un cercle rouge)
-    pygame.draw.circle(screen, ROUGE, (mouse_x, mouse_y), 10, 2)  # Cercle avec bordure
-
-    #Met à jour l'affichage (60 frames par secondes)
-    pygame.display.update()
-    clock.tick(60)
-
-pygame.quit()
-sys.exit()
+if __name__ == "__main__":
+    current = Maitresse()
+    current.run()
