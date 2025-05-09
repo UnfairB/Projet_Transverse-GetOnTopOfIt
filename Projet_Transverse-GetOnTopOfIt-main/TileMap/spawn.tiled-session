@@ -1,0 +1,38 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "zone0.tmx",
+    "expandedProjectPaths": [
+        "."
+    ],
+    "fileStates": {
+        "tilesetgrasses.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "zone0.tmx": {
+            "scale": 0.8277573529411765,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 544.2416166999777,
+                "y": 367.86142571618916
+            }
+        }
+    },
+    "last.imagePath": "C:/Users/tomyj/PycharmProjects/Projet_Transverse-GetOnTopOfIt/TileMap",
+    "map.height": 23,
+    "map.lastUsedFormat": "tmx",
+    "map.width": 34,
+    "openFiles": [
+        "zone0.tmx",
+        "tilesetgrasses.tsx"
+    ],
+    "project": "spawn.tiled-project",
+    "recentFiles": [
+        "tilesetgrasses.tsx",
+        "zone0.tmx"
+    ],
+    "tileset.lastUsedFormat": "tsx"
+}
