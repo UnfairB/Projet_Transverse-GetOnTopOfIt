@@ -24,12 +24,13 @@ class StateManager:
     def push_state(self, state_key):
         """ Ajoute un état au sommet de la pile et l'active. """
         if self.state_stack:
-            self.state_stack[-1].exit_state() # Notifie l'ancien état actif (s'il y en a un)
+            self.state_stack[-1].exit_state()  # Notifie l'ancien état actif (s'il y en a un)
         
         state = self.states_map.get(state_key)
         if state:
             self.state_stack.append(state)
-            state.enter_state() # Notifie le nouvel état actif
+            state.enter_state()  # Notifie le nouvel état actif
+            print(f"State pushed: {state_key}")  # Debug: Confirm state transition
         else:
             print(f"Erreur: Clé d'état inconnue '{state_key}'")
 

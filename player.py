@@ -134,12 +134,10 @@ class Player(pg.sprite.Sprite):
         """
         hits = pg.sprite.spritecollide(self, self.game.platforms, False)
         for hit_platform in hits:
-            if self.vel.y > 0: 
-                if self.rect.bottom > hit_platform.rect.top: 
-                    self.rect.bottom = hit_platform.rect.top 
-                    self.vel.y = 0 
-                    self.on_ground = True 
-            elif self.vel.y < 0: 
-                if self.rect.top < hit_platform.rect.bottom: 
-                    self.rect.top = hit_platform.rect.bottom 
-                    self.vel.y = 0
+            if self.vel.y > 0:  # Descending
+                self.rect.bottom = hit_platform.rect.top
+                self.vel.y = 0
+                self.on_ground = True
+            elif self.vel.y < 0:  # Ascending
+                self.rect.top = hit_platform.rect.bottom
+                self.vel.y = 0
