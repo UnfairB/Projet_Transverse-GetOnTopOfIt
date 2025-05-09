@@ -1,0 +1,13 @@
+Game presentation :
+    Title : GetOnTopOfIt
+    Contributors : Clément DRIESCH, Tom GARRIDO, Faustin MOUROT, Maxime LAURENT, Denyce NEGAi 
+    Description : Un jeu de plateforme inspiré de Jump King et Celeste, où la progression se fait à travers différents "tableaux" divisant l’espace de jeu en plusieurs séquences avec une progression verticale.
+    Main features : Système de scène dynamique/Trajectoire du bâton/Collision du bâton
+    Technologies Used : Python avec le module pygame pour l'interface graphique, Git pour les dépots de groupe, Piksl pour les sprites, Notion pour la gestion de l'avancé du projet
+    Installation : Cloner le dépot Git, installer python et le moduel pygame
+    Use : Lancer le fichier .ex
+
+Technical Documentation :
+    Game Algorithm : 
+    Functions details : 
+    Input and Error Management :
