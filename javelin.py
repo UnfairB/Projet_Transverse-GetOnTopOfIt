@@ -1,4 +1,5 @@
 import pygame as pg
+import pygame.mixer
 import math
 from settings import JAVELIN_SPEED, JAVELIN_GRAVITY, JAVELIN_RECALL_SPEED, TILE_SIZE
 
@@ -100,6 +101,13 @@ class Javelin(pg.sprite.Sprite):
         if collided_platforms:
             # Le javelot a touché un mur/plateforme
             self.state = 'stuck'
+
+            # Jouer le son Lance.wav
+            try:
+                lance_sound = pg.mixer.Sound("Sound/Lance.wav")
+                lance_sound.play()
+            except pg.error as e:
+                print(f"Erreur: Impossible de jouer le son 'Sound/Lance.wav': {e}")
 
             # Ajoute ce javelot au groupe des plateformes
             self.game_state.platforms.add(self)

@@ -34,6 +34,13 @@ class Game:
         # Initialisation du StateManager
         self.state_manager = StateManager(self) # Passe l'instance de Game au StateManager
 
+        # Charger et jouer la musique de fond
+        try:
+            pg.mixer.music.load("Sound/Benz.wav")  # Charger le fichier Benz.wav
+            pg.mixer.music.play(-1)  # Jouer en boucle (-1 pour une boucle infinie)
+        except pg.error as e:
+            print(f"Erreur: Impossible de charger ou jouer la musique 'Sound/Benz.wav': {e}")
+
     def run(self):
         """
         Boucle de jeu principale.
