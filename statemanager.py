@@ -1,5 +1,5 @@
 import pygame as pg
-from states import MenuState, GameState, PauseState # Importer les classes d'état
+from states import MenuState, GameState, PauseState, SettingsState  # Add SettingsState
 
 class StateManager:
     """
@@ -10,7 +10,8 @@ class StateManager:
         self.states_map = { # Dictionnaire pour stocker les instances des états
             "menu": MenuState(self, self.game),
             "game": GameState(self, self.game),
-            "pause": PauseState(self, self.game)
+            "pause": PauseState(self, self.game),
+            "settings": SettingsState(self, self.game)  # Register the new state
         }
         self.state_stack = [] # Pile pour gérer les états (ex: pause par-dessus jeu)
         

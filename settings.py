@@ -15,6 +15,7 @@ RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 LIGHTBLUE = (173, 216, 230) # Couleur de fond
+BEIGE = (255, 229, 204)
 
 # Propriétés du joueur
 PLAYER_ACC = 0.5  # Accélération du joueur (non utilisé dans ce modèle simple)
@@ -31,3 +32,6 @@ JAVELIN_SPEED = 15       # Vitesse initiale du javelot
 JAVELIN_GRAVITY = 0.5    # Gravité affectant le javelot
 JAVELIN_RECALL_SPEED = 25 # Vitesse à laquelle le javelot retourne au joueur
 JAVELIN_LIFESPAN_STUCK = 10000 # Temps en ms avant qu'un javelot planté disparaisse (optionnel, non implémenté ici)
+
+# Global volume for the game
+GAME_VOLUME = 1.0  # Default volume (100%)
