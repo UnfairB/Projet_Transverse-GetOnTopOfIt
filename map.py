@@ -1,6 +1,6 @@
 import pygame as pg
 import pytmx
-from settings import TILE_SIZE # GREEN is not used here anymore
+from settings import TILE_SIZE 
 
 class Platform(pg.sprite.Sprite):
     """
@@ -47,11 +47,11 @@ class Map:
         """
         for layer in self.tmx_data.visible_layers:
             if isinstance(layer, pytmx.TiledTileLayer):
-                for x, y, item in layer.tiles(): # item can be a GID (int) or an image (Surface)
-                    if item: # Check if there's a tile/image
-                        if isinstance(item, pg.Surface): # If item is already a Surface (image)
+                for x, y, item in layer.tiles(): # Item peut être un GID(int) ou une image (surface)
+                    if item: # Vérifie si c'est bien une tuile/image
+                        if isinstance(item, pg.Surface): # Si l'item n'est pas déjà une image (surface)
                             tile_image = item
-                        else: # Otherwise, item should be a GID (int)
+                        else: # Sinon, l'item est probablement un GID(int)
                             tile_image = self.tmx_data.get_tile_image_by_gid(item)
                         
                         if tile_image:
@@ -69,9 +69,9 @@ class Map:
         """
         for layer in self.tmx_data.layers: 
             if isinstance(layer, pytmx.TiledTileLayer) and layer.name in self.collidable_layer_names:
-                for x, y, gid in layer.tiles(): # x, y are tile coordinates (columns, rows)
-                    if gid != 0: # If a tile exists at this position (non-zero GID)
-                        # Create a collision platform for this tile
+                for x, y, gid in layer.tiles(): # x,y sont les coordonnées de chaque tuile, (colonne, ligne)
+                    if gid != 0: # Si une tuile est présente (gid != 0)
+                        # Créer une plateforme de collision à cette position
                         platform_x = x * self.tile_width
                         platform_y = y * self.tile_height
                         
@@ -82,7 +82,6 @@ class Map:
         if not self.game_state.platforms:
             print("Warning: No collision platforms were loaded.")
         else:
-            # This print can be useful for final checks, but can be removed if too verbose for prod
             print(f"{len(self.game_state.platforms)} collision platforms loaded.")
 
 

@@ -20,7 +20,7 @@ LIGHTBLUE = (173, 216, 230) # Couleur de fond
 PLAYER_ACC = 0.5  # Accélération du joueur (non utilisé dans ce modèle simple)
 PLAYER_FRICTION = -0.12 # Friction (non utilisé dans ce modèle simple)
 PLAYER_GRAVITY = 0.8 # Gravité appliquée au joueur
-PLAYER_JUMP_STRENGTH = -15 # Force du saut du joueur (valeur négative pour monter)
+PLAYER_JUMP_STRENGTH = -14 # Force du saut du joueur (valeur négative pour monter)
 PLAYER_SPEED = 5 # Vitesse de déplacement horizontal du joueur
 
 # Propriétés de la carte

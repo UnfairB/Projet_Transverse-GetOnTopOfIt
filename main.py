@@ -47,6 +47,7 @@ class Game:
         S'exécute tant que self.running est True.
         Délègue la logique aux états via le StateManager.
         """
+        pg.mouse.set_visible(False)  # Cache le curseur de la souris
         while self.running:
             dt = self.clock.tick(FPS) / 1000.0 # Delta-temps
 
@@ -59,6 +60,10 @@ class Game:
 
             # Dessin via le StateManager
             self.state_manager.draw(self.screen)
+
+            # Dessiner un cercle rouge à la position de la souris
+            mouse_pos = pg.mouse.get_pos()
+            pg.draw.circle(self.screen, (255, 0, 0), mouse_pos, 8,3) 
             
             pg.display.flip() # Met à jour l'écran
 

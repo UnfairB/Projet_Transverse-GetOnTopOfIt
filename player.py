@@ -90,7 +90,7 @@ class Player(pg.sprite.Sprite):
 
     def throw_javelin(self, target_pos_world):
         """
-        Logique pour que le joueur lance un javelot.
+        Logique pour que le joueur lance ou rappelle un javelot.
         Appelé depuis GameState en réponse à un clic de souris.
         :param target_pos_world: Coordonnées mondiales où le joueur vise.
         """
@@ -104,8 +104,9 @@ class Player(pg.sprite.Sprite):
             
             self.has_javelin = False
             self.active_javelin_sprite = new_javelin
-        else:
-            print("Joueur essaie de lancer, mais n'a pas de javelot.")
+        elif self.active_javelin_sprite and self.active_javelin_sprite.state == 'stuck':
+            print("Joueur rappelle le javelot.")
+            self.active_javelin_sprite.recall()
 
     def retrieve_javelin(self):
         """
@@ -134,10 +135,10 @@ class Player(pg.sprite.Sprite):
         """
         hits = pg.sprite.spritecollide(self, self.game.platforms, False)
         for hit_platform in hits:
-            if self.vel.y > 0:  # Descending
+            if self.vel.y > 0:  
                 self.rect.bottom = hit_platform.rect.top
                 self.vel.y = 0
                 self.on_ground = True
-            elif self.vel.y < 0:  # Ascending
+            elif self.vel.y < 0:  
                 self.rect.top = hit_platform.rect.bottom
                 self.vel.y = 0

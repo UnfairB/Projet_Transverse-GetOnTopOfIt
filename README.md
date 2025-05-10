@@ -6,8 +6,7 @@
 
 
 ### Fonctionnalités principales
-- Système de scènes dynamiques
-- Mécanique de lancer et rappel du bâton/javelot
+- Mécanique de lancer et rappel du bâton/javelot (via l'utilisation d'une courbe de trajectoire parabolique)
 - Système de collision précis avec l'environnement
 - Progression verticale à travers différents niveaux de difficulté
 
@@ -43,8 +42,8 @@
 - **Déplacement**: Flèches gauche/droite ou Q/D
 - **Saut**: Barre d'espace, flèche du haut ou Z
 - **Lancer javelot**: Clique gauche souris
-- **Faire revenir javelot**: Touche maj
-- **Quitter**: Échap
+- **Faire revenir javelot**: Clique gauche souris
+- **Quitter / Menu pause**: Échap
 
 ## Architecture du projet
 
