@@ -118,6 +118,36 @@ class GameState(State):
         self.spikes = None  # Ajout pour les pics
         self.music_playing = False
 
+        # Altitude gauge properties
+        self.gauge_rect = pg.Rect(50, 50, 20, 300)  # Position and size of the gauge
+        self.gauge_color = (0, 255, 0)  # Green color for the gauge
+        self.start_y = 6229  # Starting Y position
+        self.end_y = 341  # Ending Y position
+
+    def draw_altitude_gauge(self, surface):
+        """
+        Draws the altitude gauge on the screen.
+        """
+        # Calculate the fill percentage based on the player's Y position
+        if self.player:
+            player_y = self.player.rect.y
+            fill_percentage = max(0, min(1, (self.start_y - player_y) / (self.start_y - self.end_y)))
+
+            # Calculate the height of the filled portion
+            filled_height = int(self.gauge_rect.height * fill_percentage)
+
+            # Draw the empty gauge
+            pg.draw.rect(surface, (0, 0, 0), self.gauge_rect, 2)  # Black border
+
+            # Draw the filled portion
+            filled_rect = pg.Rect(
+                self.gauge_rect.x,
+                self.gauge_rect.y + self.gauge_rect.height - filled_height,
+                self.gauge_rect.width,
+                filled_height
+            )
+            pg.draw.rect(surface, self.gauge_color, filled_rect)
+
     def enter_state(self):
         super().enter_state()
         # Start playing the music when entering the game state
@@ -283,12 +313,8 @@ class GameState(State):
             for spike in self.spikes:
                 surface.blit(spike.image, self.camera.apply(spike.rect))
 
-        if self.game.font:
-            player_world_x = self.player.rect.x
-            player_world_y = self.player.rect.y
-            coord_text = f"Player X: {int(player_world_x)}, Y: {int(player_world_y)}"
-            text_surface = self.game.font.render(coord_text, True, BLACK)
-            surface.blit(text_surface, (10, 10))
+        # Draw the altitude gauge
+        self.draw_altitude_gauge(surface)
 
 
 class PauseState(State):
