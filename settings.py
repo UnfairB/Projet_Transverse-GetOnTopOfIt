@@ -33,5 +33,5 @@ JAVELIN_GRAVITY = 0.5    # Gravité affectant le javelot
 JAVELIN_RECALL_SPEED = 25 # Vitesse à laquelle le javelot retourne au joueur
 JAVELIN_LIFESPAN_STUCK = 10000 # Temps en ms avant qu'un javelot planté disparaisse (optionnel, non implémenté ici)
 
-# Global volume for the game
+# Volume Global de la musique
 GAME_VOLUME = 1.0  # Default volume (100%)

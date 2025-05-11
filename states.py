@@ -239,7 +239,7 @@ class MenuState(State):
         self.title_font = pg.font.Font(None, 74)
         self.setup_buttons()
 
-        # Load the background image for the menu
+        # Charger l'image de fond
         try:
             self.background_image = pg.image.load("Fond/menu_background.png").convert()
             self.background_image = pg.transform.scale(self.background_image, (WIDTH, HEIGHT))
@@ -280,26 +280,26 @@ class MenuState(State):
 
     def enter_state(self):
         super().enter_state()
-        # Ensure no music is played in the menu
+        # Est-ce que la musique est déjà jouée ?
         pg.mixer.music.stop()
 
     def exit_state(self):
         super().exit_state()
-        # No need to handle music here
+        # Pas besoin de gérer la musique ici, elle est arrêtée dans enter_state
 
     def draw(self, surface):
-        # Draw the background image if available
+        # Dessiner l'image de fond
         if self.background_image:
             surface.blit(self.background_image, (0, 0))
         else:
-            surface.fill(LIGHTBLUE)  # Fallback to light blue if the image fails to load
+            surface.fill(LIGHTBLUE)  # Retourne à la couleur de fond par défaut si l'image échoue à charger
 
-        # Draw the title
+        # Dessiner le titre
         title_surf = self.title_font.render(TITLE, True, WHITE)  # Change color to WHITE
         title_rect = title_surf.get_rect(center=(WIDTH // 2, HEIGHT // 4))
         surface.blit(title_surf, title_rect)
 
-        # Draw the buttons
+        # Dessiner les boutons
         for button in self.buttons:
             button.draw(surface)
 
@@ -322,7 +322,7 @@ class GameState(State):
         self.portal_img = None
         self.music_playing = False
 
-        # Load the skyscape background image
+        # Charger l'image de fond
         try:
             self.background_image = pg.image.load("Fond/dark_forest.png").convert()
             self.background_image = pg.transform.scale(self.background_image, (WIDTH, HEIGHT))
@@ -330,27 +330,27 @@ class GameState(State):
             print(f"Erreur: Impossible de charger l'image de fond 'fond/dark_forest.png': {e}")
             self.background_image = None
 
-        self.gauge_rect = pg.Rect(WIDTH - 20, HEIGHT // 2 - 150, 20, 300)  # Stick to the right border
-        self.gauge_color = (0, 255, 0)  # Green color for the gauge
-        self.start_y = 6229  # Starting Y position
-        self.end_y = 341  # Ending Y position
+        self.gauge_rect = pg.Rect(WIDTH - 20, HEIGHT // 2 - 150, 20, 300)  # création du rectangle de la jauge
+        self.gauge_color = (0, 255, 0)  # Couleur de la jauge (vert)
+        self.start_y = 6229  # Coordonée Y de départ
+        self.end_y = 341  # Fin de la jauge (coordonnée Y de la carte)
 
     def draw_altitude_gauge(self, surface):
         """
         Draws the altitude gauge on the screen.
         """
-        # Calculate the fill percentage based on the player's Y position
+        # calculer la hauteur de la jauge en fonction de la position du joueur
         if self.player:
             player_y = self.player.rect.y
             fill_percentage = max(0, min(1, (self.start_y - player_y) / (self.start_y - self.end_y)))
 
-            # Calculate the height of the filled portion
+            # Calculer la hauteur remplie de la jauge
             filled_height = int(self.gauge_rect.height * fill_percentage)
 
-            # Draw the empty gauge
-            pg.draw.rect(surface, (0, 0, 0), self.gauge_rect, 2)  # Black border
+            # dessiner le contour de la jauge
+            pg.draw.rect(surface, (0, 0, 0), self.gauge_rect, 2)  # bordure noire
 
-            # Draw the filled portion
+            # Dessiner la jauge remplie
             filled_rect = pg.Rect(
                 self.gauge_rect.x,
                 self.gauge_rect.y + self.gauge_rect.height - filled_height,
@@ -361,12 +361,12 @@ class GameState(State):
 
     def enter_state(self):
         super().enter_state()
-        # Start playing the music when entering the game state
+        # commenté la musique si elle est déjà jouée
         if not self.music_playing:
             try:
-                pg.mixer.music.load("Music/Benz.wav")  # Load the music file
-                pg.mixer.music.set_volume(GAME_VOLUME)  # Set the volume based on the global variable
-                pg.mixer.music.play(-1)  # Play in a loop
+                pg.mixer.music.load("Music/Benz.wav")  # charger le fichier Benz.wav
+                pg.mixer.music.set_volume(GAME_VOLUME)  # mettre le volume (0.0 à 1.0)
+                pg.mixer.music.play(-1)  # jouer en boucle (-1 pour une boucle infinie)
                 self.music_playing = True
             except pg.error as e:
                 print(f"Erreur: Impossible de charger ou jouer la musique 'Music/Benz.wav': {e}")
@@ -473,7 +473,7 @@ class GameState(State):
 
     def exit_state(self):
         super().exit_state()
-        # Stop the music when exiting the game state
+        # arrete la musique si elle est en cours
         if self.music_playing:
             pg.mixer.music.stop()
             self.music_playing = False
@@ -553,32 +553,32 @@ class GameState(State):
                 surface.blit(err_surf, err_rect)
             return
 
-        # Scale the background image for scrolling
+        # Dessiner l'image de fond
         if self.background_image:
             scaled_height = HEIGHT * 2  # Make the background image twice the screen height
             scaled_width = int(self.background_image.get_width() * (scaled_height / self.background_image.get_height()))
             scaled_background = pg.transform.scale(self.background_image, (scaled_width, scaled_height))
 
-            # Calculate the vertical offset based on the player's Y position
+            # calculer le décalage en fonction de la position du joueur
             player_y = self.player.rect.y
             max_offset = scaled_height - HEIGHT  # Maximum scrollable height
 
-            # Reverse the offset logic: start at the bottom of the image and scroll up as the player climbs
+            # rendre le décalage proportionnel à la position du joueur
             offset_y = max(0, min(max_offset, (player_y - self.end_y) / (self.start_y - self.end_y) * max_offset))
 
-            # Draw the background image with the calculated offset
+            # Dessiner l'image de fond avec le décalage
             surface.blit(scaled_background, (0, -offset_y))
         else:
             surface.fill(LIGHTBLUE)
 
-        # Draw the map and game elements
+        # dessiner la carte
         self.map.render(surface, self.camera)
 
         for sprite in self.all_sprites:
             if hasattr(sprite, 'image') and hasattr(sprite, 'rect'):
                 surface.blit(sprite.image, self.camera.apply(sprite.rect))
 
-        # --- Draw spikes ---
+        # --- Dessine les pics ---
         if self.spikes:
             for spike in self.spikes:
                 surface.blit(spike.image, self.camera.apply(spike.rect))
@@ -596,7 +596,7 @@ class GameState(State):
             text_surface = self.game.font.render(coord_text, True, BLACK)
             surface.blit(text_surface, (10, 10))
 
-        # Draw the altitude gauge
+        # Dessiner les javelots
         self.draw_altitude_gauge(surface)
 
     # Méthode appelée par Player à la fin de l'animation de mort
@@ -665,10 +665,10 @@ class SettingsState(State):
         self.overlay = pg.Surface((WIDTH, HEIGHT), pg.SRCALPHA)
         self.overlay.fill((0, 0, 0, 180))
         self.title_font = pg.font.Font(None, 74)
-        self.slider_rect = pg.Rect(WIDTH // 2 - 150, HEIGHT // 2, 300, 10)  # Slider bar
+        self.slider_rect = pg.Rect(WIDTH // 2 - 150, HEIGHT // 2, 300, 10)  # Slider
         self.knob_rect = pg.Rect(self.slider_rect.x + self.slider_rect.width - 10, self.slider_rect.y - 5, 20, 20)  # Slider knob
         self.dragging = False
-        self.volume = 1.0  # Default volume (100%)
+        self.volume = 1.0  #  volume (100%)
         self.setup_buttons()
 
     def setup_buttons(self):
@@ -694,40 +694,40 @@ class SettingsState(State):
             elif event.type == pg.MOUSEBUTTONUP:
                 self.dragging = False
             elif event.type == pg.MOUSEMOTION and self.dragging:
-                # Drag the knob within the slider bar
+                # Déplacer le bouton du curseur
                 self.knob_rect.x = max(self.slider_rect.x, min(event.pos[0] - self.knob_rect.width // 2, self.slider_rect.x + self.slider_rect.width - self.knob_rect.width))
                 
-                # Update the volume based on the knob's position
-                # Ensure the volume is mapped correctly to the range [0.0, 1.0]
+                # mettre à jour le volume
+                # volume = (position du curseur - position de départ) / (largeur totale - largeur du curseur)
                 self.volume = (self.knob_rect.x - self.slider_rect.x) / (self.slider_rect.width - self.knob_rect.width)
                 self.volume = max(0.0, min(self.volume, 1.0))  # Clamp the volume to [0.0, 1.0]
 
                 global GAME_VOLUME
-                GAME_VOLUME = self.volume  # Update the global volume
-                pg.mixer.music.set_volume(GAME_VOLUME)  # Adjust the music volume in real-time
+                GAME_VOLUME = self.volume  # mettre à jour le volume global
+                pg.mixer.music.set_volume(GAME_VOLUME)  # ajuster le volume de la musique
 
     def draw(self, surface):
-        # Fill the background with the same color as the main menu
+        # remplir l'écran avec une couleur
         surface.fill(BEIGE)
 
-        # Draw the title
+        # dessiner l'overlay
         title_surf = self.title_font.render("Options", True, BLACK)
         title_rect = title_surf.get_rect(center=(WIDTH // 2, HEIGHT // 4))
         surface.blit(title_surf, title_rect)
 
-        # Draw the slider bar
+        # Dessiner le slider
         pg.draw.rect(surface, BLACK, self.slider_rect)
-        # Draw the slider knob
+        # Dessiner le curseur
         pg.draw.ellipse(surface, RED, self.knob_rect)
 
-        # Draw the volume percentage
+        # dessiner le texte du volume
         if self.game.font:
             volume_text = f"Volume: {int(self.volume * 100)}%"
             volume_surf = self.game.font.render(volume_text, True, BLACK)
             volume_rect = volume_surf.get_rect(center=(WIDTH // 2, self.slider_rect.y - 30))
             surface.blit(volume_surf, volume_rect)
 
-        # Draw the buttons
+        # Dessiner les boutons
         for button in self.buttons:
             button.draw(surface)
 

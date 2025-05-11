@@ -60,9 +60,6 @@ class Game:
             
             pg.display.flip() # Met à jour l'écran
 
-# filepath: c:\Repo\Projet_Transverse-GetOnTopOfIt\statemanager.py
-# Add the following logic in the game state (assuming you have a game state in your StateManager)
-
 class GameState:
     def __init__(self, game):
         self.game = game
@@ -90,15 +87,15 @@ class GameState:
             self.music_playing = False
 
     def handle_events(self, events):
-        # Handle game-specific events
+        # Gérer les événements du jeu
         pass
 
     def update(self, dt):
-        # Update game logic
+        # Mise à jour de la logique du jeu
         pass
 
     def draw(self, screen):
-        # Draw game elements
+        # Dessiner les éléments du jeu
         pass
 
 if __name__ == '__main__':
