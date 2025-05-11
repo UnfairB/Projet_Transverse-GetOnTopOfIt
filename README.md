@@ -80,7 +80,7 @@ La détection de collisions utilise le système de rectangles de Pygame pour gé
 - Tom GARRIDO
 - Faustin MOUROT
 - Maxime LAURENT
-- Denyce NEGAI
+- Denyce NEGAI SAULIN
 
 ---
 
