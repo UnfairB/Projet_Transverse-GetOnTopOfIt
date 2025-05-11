@@ -34,13 +34,6 @@ class Game:
         # Initialisation du StateManager
         self.state_manager = StateManager(self) # Passe l'instance de Game au StateManager
 
-        # Charger et jouer la musique de fond
-        try:
-            pg.mixer.music.load("Sound/Benz.wav")  # Charger le fichier Benz.wav
-            pg.mixer.music.play(-1)  # Jouer en boucle (-1 pour une boucle infinie)
-        except pg.error as e:
-            print(f"Erreur: Impossible de charger ou jouer la musique 'Sound/Benz.wav': {e}")
-
     def run(self):
         """
         Boucle de jeu principale.
@@ -66,6 +59,47 @@ class Game:
             pg.draw.circle(self.screen, (255, 0, 0), mouse_pos, 8,3) 
             
             pg.display.flip() # Met à jour l'écran
+
+# filepath: c:\Repo\Projet_Transverse-GetOnTopOfIt\statemanager.py
+# Add the following logic in the game state (assuming you have a game state in your StateManager)
+
+class GameState:
+    def __init__(self, game):
+        self.game = game
+        self.music_playing = False
+
+    def enter(self):
+        """
+        Called when entering the game state.
+        """
+        if not self.music_playing:
+            try:
+                pg.mixer.music.load("Music/Benz.wav")  # Charger le fichier Benz.wav
+                pg.mixer.music.set_volume(0.3)  # Réduire le volume (0.0 à 1.0)
+                pg.mixer.music.play(-1)  # Jouer en boucle (-1 pour une boucle infinie)
+                self.music_playing = True
+            except pg.error as e:
+                print(f"Erreur: Impossible de charger ou jouer la musique 'Music/Benz.wav': {e}")
+
+    def exit(self):
+        """
+        Called when exiting the game state.
+        """
+        if self.music_playing:
+            pg.mixer.music.stop()
+            self.music_playing = False
+
+    def handle_events(self, events):
+        # Handle game-specific events
+        pass
+
+    def update(self, dt):
+        # Update game logic
+        pass
+
+    def draw(self, screen):
+        # Draw game elements
+        pass
 
 if __name__ == '__main__':
     g = Game() 

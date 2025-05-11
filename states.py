@@ -58,7 +58,7 @@ class MenuState(State):
         button_width = 200
         button_height = 50
         spacing = 20
-        start_y = HEIGHT // 2 - button_height - spacing
+        start_y = HEIGHT // 2 - button_height - spacing // 2
 
         self.buttons.append(Button(
             WIDTH // 2 - button_width // 2, start_y,
@@ -68,19 +68,11 @@ class MenuState(State):
         self.buttons.append(Button(
             WIDTH // 2 - button_width // 2, start_y + button_height + spacing,
             button_width, button_height,
-            "Options", self.open_option, self.game.font
-        ))
-        self.buttons.append(Button(
-            WIDTH // 2 - button_width // 2, start_y + 2 * (button_height + spacing),
-            button_width, button_height,
             "Quitter", self.quit_game, self.game.font
         ))
 
     def start_game(self):
         self.manager.set_state("game")
-
-    def open_option(self):
-        self.manager.set_state("option")
 
     def quit_game(self):
         self.game.running = False
@@ -309,76 +301,3 @@ class PauseState(State):
 
         for button in self.buttons:
             button.draw(surface)
-
-
-class OptionState(State):
-    """
-    État du menu d'options (volume).
-    """
-    def __init__(self, manager, game_instance):
-        super().__init__(manager, game_instance)
-        self.bg_color = (245, 235, 200)
-        self.title_font = pg.font.Font(None, 60)
-        self.slider_rect = pg.Rect(WIDTH // 2 - 100, HEIGHT // 2 - 20, 200, 10)
-        self.handle_rect = pg.Rect(0, 0, 16, 32)
-        self.handle_rect.centery = self.slider_rect.centery
-        self.volume = pg.mixer.music.get_volume() if pg.mixer.get_init() else 1.0
-        self.update_handle_pos()
-        self.dragging = False
-        self.setup_buttons()
-
-    def setup_buttons(self):
-        button_width = 180
-        button_height = 45
-        self.buttons = [
-            Button(
-                WIDTH // 2 - button_width // 2,
-                HEIGHT // 2 + 40,
-                button_width, button_height,
-                "Retour", self.return_to_menu, self.game.font
-            )
-        ]
-
-    def update_handle_pos(self):
-        self.handle_rect.centerx = int(self.slider_rect.left + self.volume * self.slider_rect.width)
-
-    def handle_events(self, events):
-        super().handle_events(events)
-        for event in events:
-            if event.type == pg.MOUSEBUTTONDOWN:
-                if self.handle_rect.collidepoint(event.pos):
-                    self.dragging = True
-            elif event.type == pg.MOUSEBUTTONUP:
-                self.dragging = False
-            elif event.type == pg.MOUSEMOTION and self.dragging:
-                x = min(max(event.pos[0], self.slider_rect.left), self.slider_rect.right)
-                self.handle_rect.centerx = x
-                self.volume = (x - self.slider_rect.left) / self.slider_rect.width
-                if pg.mixer.get_init():
-                    pg.mixer.music.set_volume(self.volume)
-        # Retour clavier
-        for event in events:
-            if event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
-                self.return_to_menu()
-
-    def draw(self, surface):
-        surface.fill(self.bg_color)
-        title_surf = self.title_font.render("Options", True, (60, 60, 60))
-        title_rect = title_surf.get_rect(center=(WIDTH // 2, HEIGHT // 4))
-        surface.blit(title_surf, title_rect)
-
-        # Barre de volume
-        pg.draw.rect(surface, (0, 0, 0), self.slider_rect, border_radius=5)
-        pg.draw.rect(surface, (40, 40, 40), self.handle_rect, border_radius=4)
-        # Texte volume
-        if self.game.font:
-            vol_txt = f"Volume : {int(self.volume * 100)}%"
-            vol_surf = self.game.font.render(vol_txt, True, (40, 40, 40))
-            vol_rect = vol_surf.get_rect(center=(WIDTH // 2, self.slider_rect.top - 20))
-            surface.blit(vol_surf, vol_rect)
-
-        for button in self.buttons:
-            button.draw(surface)
-
-    def return_to_menu(self):
-        self.manager.set_state("menu")
