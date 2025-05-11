@@ -55,8 +55,8 @@ def lancer_intro(ecran):
 
     paragraphes = [
         "La fête faisait rage sur le mont Olympe, un banquet où les dieux se lâchaient complètement, oubliant toute retenue.",
-        "Dionysos, le dieu du vin et de la fête, était au centre de l’attention, riant et plaisantant, tandis que les dieux se livraient à des excès de tous genres. Le vin coulait à flots, les mets se succédaient sans fin, et les danses étaient de plus en plus folles.",
-        "Mais pour Zeus, le roi des dieux, c’était trop. Il voyait ses pairs sombrer dans la démesure, et l’harmonie de l’Olympe s’effondrer sous le poids des excès. Son regard, habituellement sage, se faisait de plus en plus sombre. Une colère sourde montait en lui, alors que la fête de Dionysos devenait un chaos qu’il ne pouvait plus supporter."
+        " Dionysos, le dieu du vin et de la fête, était au centre de l’attention, riant et plaisantant, tandis que les dieux se livraient à des excès de tous genres. Le vin coulait à flots, les mets se succédaient sans fin, et les danses étaient de plus en plus folles.",
+        " Mais pour Zeus, le roi des dieux, c’était trop. Il voyait ses pairs sombrer dans la démesure, et l’harmonie de l’Olympe s’effondrer sous le poids des excès. Son regard, habituellement sage, se faisait de plus en plus sombre. Une colère sourde montait en lui, alors que la fête de Dionysos devenait un chaos qu’il ne pouvait plus supporter."
     ]
 
     clock = pygame.time.Clock()
