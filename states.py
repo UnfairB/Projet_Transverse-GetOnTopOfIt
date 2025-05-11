@@ -81,7 +81,7 @@ class MenuState(State):
         self.manager.set_state("game")
 
     def open_settings(self):
-        self.manager.set_state("settings")
+        self.manager.set_state("option")
 
     def quit_game(self):
         self.game.running = False
@@ -118,7 +118,6 @@ class GameState(State):
         self.spikes = None  # Ajout pour les pics
         self.music_playing = False
 
-        # Altitude gauge properties
         self.gauge_rect = pg.Rect(WIDTH - 20, HEIGHT // 2 - 150, 20, 300)  # Stick to the right border
         self.gauge_color = (0, 255, 0)  # Green color for the gauge
         self.start_y = 6229  # Starting Y position
@@ -237,6 +236,8 @@ class GameState(State):
         self.monsters.add(zombie1)
         self.monsters.add(zombie2) 
 
+        self._player_dead = False  # Flag pour bloquer le jeu pendant la mort
+
     def exit_state(self):
         super().exit_state()
         # Stop the music when exiting the game state
@@ -255,6 +256,9 @@ class GameState(State):
 
     def handle_events(self, events):
         super().handle_events(events)
+        # Bloque toutes les entrées si le joueur est en train de mourir
+        if self.player and getattr(self.player, "is_dead", False):
+            return
         for event in events:
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_SPACE or event.key == pg.K_UP or event.key == pg.K_z:
@@ -262,9 +266,6 @@ class GameState(State):
                         self.player.jump()
                 if event.key == pg.K_ESCAPE:
                     self.manager.push_state("pause")
-                if event.key == pg.K_LSHIFT or event.key == pg.K_RSHIFT:
-                    if self.player and self.player.active_javelin_sprite:
-                        self.player.active_javelin_sprite.recall()
 
             if event.type == pg.MOUSEBUTTONDOWN:
                 if event.button == 1:
@@ -275,22 +276,35 @@ class GameState(State):
 
     def update(self, dt):
         super().update(dt)
-        # Dynamically update the volume of the music
+        # Augmente dynamique le volume de la musique
         if self.music_playing:
             pg.mixer.music.set_volume(GAME_VOLUME)
 
         if not self.player or not self.camera or not self.all_sprites:
             return
 
+        # Si le joueur est en train de mourir, ne rien mettre à jour d'autre que lui
+        if getattr(self.player, "is_dead", False):
+            self.player.update(dt)
+            self.camera.update(self.player.rect)
+            return
+
         self.all_sprites.update(dt)
         self.camera.update(self.player.rect)
 
-        # --- Collision joueur-monstre : recommencer la partie ---
-        if self.monsters and pg.sprite.spritecollideany(self.player, self.monsters):
-            self.manager.set_state("game")
-        # --- Collision joueur-pics : recommencer la partie ---
-        if self.spikes and pg.sprite.spritecollideany(self.player, self.spikes):
-            self.manager.set_state("game")
+        # --- Collision joueur-monstre : lancer animation de mort ---
+        if self.monsters:
+            for monster in list(self.monsters):
+                if getattr(monster, "is_dead", False):
+                    continue
+                if pg.sprite.collide_rect(self.player, monster):
+                    if not getattr(self.player, "is_dead", False):
+                        self.player.die()
+                    break
+        # --- Collision joueur-pics : lancer animation de mort ---
+        elif self.spikes and pg.sprite.spritecollideany(self.player, self.spikes):
+            if not getattr(self.player, "is_dead", False):
+                self.player.die()
 
     def draw(self, surface):
         if not self.map or not self.camera or not self.all_sprites or not self.player:
@@ -313,9 +327,19 @@ class GameState(State):
             for spike in self.spikes:
                 surface.blit(spike.image, self.camera.apply(spike.rect))
 
+        if self.game.font:
+            player_world_x = self.player.rect.x
+            player_world_y = self.player.rect.y
+            coord_text = f"Player X: {int(player_world_x)}, Y: {int(player_world_y)}"
+            text_surface = self.game.font.render(coord_text, True, BLACK)
+            surface.blit(text_surface, (10, 10))
+
         # Draw the altitude gauge
         self.draw_altitude_gauge(surface)
 
+    # Méthode appelée par Player à la fin de l'animation de mort
+    def go_to_main_menu(self):
+        self.manager.set_state("menu")
 
 class PauseState(State):
     """
@@ -393,7 +417,7 @@ class SettingsState(State):
         self.buttons.append(Button(
             WIDTH // 2 - button_width // 2, start_y,
             button_width, button_height,
-            "Menu", self.return_to_menu, self.game.font
+            "Retour", self.return_to_menu, self.game.font
         ))
 
     def return_to_menu(self):
@@ -425,7 +449,7 @@ class SettingsState(State):
         surface.fill(BEIGE)
 
         # Draw the title
-        title_surf = self.title_font.render("Settings", True, BLACK)
+        title_surf = self.title_font.render("Options", True, BLACK)
         title_rect = title_surf.get_rect(center=(WIDTH // 2, HEIGHT // 4))
         surface.blit(title_surf, title_rect)
 

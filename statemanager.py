@@ -11,7 +11,7 @@ class StateManager:
             "menu": MenuState(self, self.game),
             "game": GameState(self, self.game),
             "pause": PauseState(self, self.game),
-            "settings": SettingsState(self, self.game)  # Register the new state
+            "option": SettingsState(self, self.game)  # Register the new state
         }
 
         self.state_stack = [] # Pile pour gérer les états (ex: pause par-dessus jeu)
@@ -73,7 +73,3 @@ class StateManager:
         # pour que les états superposés (comme la pause) se dessinent correctement.
         for state in self.state_stack:
             state.draw(surface)
-        # Si vous voulez que seul l'état actif dessine, commentez la boucle ci-dessus et décommentez ci-dessous:
-        # active_state = self.get_active_state()
-        # if active_state:
-        #     active_state.draw(surface)

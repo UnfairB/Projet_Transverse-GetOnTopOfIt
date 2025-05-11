@@ -13,7 +13,32 @@ class Monster(pg.sprite.Sprite):
         self.animation_timer = 0
         self.animation_speed = 0.12  # Plus petit = plus rapide
 
+        # Animation de mort
+        self.is_dead = False
+        self.death_images = ["Sprites/Zombie_dead1.png",
+                            "Sprites/Zombie_dead2.png",
+                            "Sprites/Zombie_dead3.png",]
+        self.death_anim_index = 0
+        self.death_anim_timer = 0
+        self.death_anim_speed = 0.15
+
+    def set_death_animation(self, images):
+        self.death_images = images
+
     def update(self, dt):
+        if self.is_dead:
+            # Animation de mort
+            self.death_anim_timer += dt
+            if self.death_anim_timer > self.death_anim_speed:
+                self.death_anim_index += 1
+                self.death_anim_timer = 0
+                if self.death_anim_index >= len(self.death_images):
+                    self.kill()  # Supprime le zombie à la fin de l'animation
+                    return
+            if self.death_anim_index < len(self.death_images):
+                self.image = self.death_images[self.death_anim_index]
+            return
+
         # Animation
         self.animation_timer += dt
         if self.animation_timer > self.animation_speed:
@@ -32,6 +57,14 @@ class Monster(pg.sprite.Sprite):
             self.rect.x -= dx
             self.direction *= -1
 
+    def die(self, death_images):
+        self.is_dead = True
+        self.death_anim_index = 0
+        self.death_anim_timer = 0
+        self.death_images = death_images
+        if self.death_images:
+            self.image = self.death_images[0]
+
     def turn(self):
         self.direction *= -1
 
@@ -43,6 +76,8 @@ class Zombie(Monster):
 
     def update(self, dt):
         super().update(dt)
+        if self.is_dead:
+            return
         # Calcul de la distance parcourue depuis le dernier retournement
         distance = abs(self.rect.x - self.start_x)
         if distance >= self.walk_distance:

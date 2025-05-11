@@ -76,6 +76,26 @@ class Javelin(pg.sprite.Sprite):
             self.rect.center = self.pos
             
             self.rotate() # Réorienter le javelot en vol
+
+            # --- Détection collision avec zombies ---
+            if hasattr(self.game_state, "monsters"):
+                for monster in self.game_state.monsters:
+                    if not getattr(monster, "is_dead", False) and self.rect.colliderect(monster.rect):
+                        # Animation de mort du zombie
+                        # Charge les sprites de mort (à adapter selon vos assets)
+                        try:
+                            death_imgs = [
+                                pg.image.load("Sprites/Zombie_dead1.png").convert_alpha(),
+                                pg.image.load("Sprites/Zombie_dead2.png").convert_alpha(),
+                                pg.image.load("Sprites/Zombie_dead3.png").convert_alpha(),
+                            ]
+                        except Exception:
+                            death_imgs = [monster.image]
+                        monster.die(death_imgs)
+                        # Empêche la collision avec le joueur (optionnel: retire du groupe monsters)
+                        self.game_state.monsters.remove(monster)
+                        break
+
             self.check_collision_walls()
 
         elif self.state == 'stuck':

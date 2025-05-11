@@ -32,6 +32,19 @@ jump_droite = ['Sprites/R_Jump_Vagabond1.png']
 jump_gauche_javelin = ['Sprites/L_Jump_Vagabaton1.png'] 
 jump_droite_javelin = ['Sprites/R_Jump_Vagabaton1.png'] 
 
+death = ['Sprites/L_Dead_Vagabond.png',
+        'Sprites/R_Dead_Vagabond.png']
+
+dead_smoke_droite = ['Sprites/R_dead_smoke1.png',
+              'Sprites/R_dead_smoke2.png',
+              'Sprites/R_dead_smoke3.png',
+              'Sprites/R_dead_smoke4.png',]
+
+dead_smoke_gauche = ['Sprites/L_dead_smoke1.png',
+              'Sprites/L_dead_smoke2.png',
+              'Sprites/L_dead_smoke3.png',
+              'Sprites/L_dead_smoke4.png',]
+
 class Player(pg.sprite.Sprite):
     """
     Classe pour représenter le joueur.
@@ -76,11 +89,48 @@ class Player(pg.sprite.Sprite):
 
         self.facing = "droite"  # Pour savoir dans quel sens on regarde
 
+        # Animation de mort
+        self.death_images = {
+            "gauche": pg.image.load(death[0]).convert_alpha(),
+            "droite": pg.image.load(death[1]).convert_alpha()
+        }
+        self.dead_smoke_images = {
+            "gauche": [pg.image.load(img).convert_alpha() for img in dead_smoke_gauche],
+            "droite": [pg.image.load(img).convert_alpha() for img in dead_smoke_droite]
+        }
+        self.is_dead = False
+        self.death_anim_phase = None  # None, 'death', 'smoke'
+        self.death_timer = 0
+        self.smoke_index = 0
+        self.smoke_anim_speed = 0.15  # secondes entre frames
+
     def jump(self):
         if self.on_ground: 
             self.vel.y = PLAYER_JUMP_STRENGTH
 
     def update(self, dt):
+        if self.is_dead:
+            self.death_timer += dt
+            if self.death_anim_phase == 'death':
+                # Affiche sprite mort pendant 0.5s puis passe à la fumée
+                if self.death_timer > 0.5:
+                    self.death_anim_phase = 'smoke'
+                    self.death_timer = 0
+                    self.smoke_index = 0
+            elif self.death_anim_phase == 'smoke':
+                # Animation de la fumée
+                if self.death_timer > self.smoke_anim_speed:
+                    self.smoke_index += 1
+                    self.death_timer = 0
+                    if self.smoke_index >= len(self.dead_smoke_images[self.facing]):
+                        # Animation terminée, retour menu principal
+                        if hasattr(self.game, 'go_to_main_menu'):
+                            self.game.go_to_main_menu()
+                        return
+                if self.smoke_index < len(self.dead_smoke_images[self.facing]):
+                    self.image = self.dead_smoke_images[self.facing][self.smoke_index]
+            return  # Ne fait rien d'autre si mort
+
         self.acc = pg.math.Vector2(0, PLAYER_GRAVITY)
 
         keys = pg.key.get_pressed()
@@ -160,6 +210,17 @@ class Player(pg.sprite.Sprite):
         print("Joueur a récupéré le javelot.")
         self.has_javelin = True
         self.active_javelin_sprite = None
+
+    def die(self):
+        if not self.is_dead:
+            self.is_dead = True
+            self.death_anim_phase = 'death'
+            self.death_timer = 0
+            # Affiche le sprite de mort selon l'orientation
+            self.image = self.death_images[self.facing]
+            # Désactive les collisions/mouvements
+            self.vel = pg.math.Vector2(0, 0)
+            self.acc = pg.math.Vector2(0, 0)
 
     def check_collision_x(self):
         hits = pg.sprite.spritecollide(self, self.game.platforms, False)
