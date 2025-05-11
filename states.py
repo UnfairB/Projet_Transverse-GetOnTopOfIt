@@ -57,7 +57,7 @@ class MenuState(State):
 
         # Load the background image for the menu
         try:
-            self.background_image = pg.image.load("Fond/GPT.png").convert()
+            self.background_image = pg.image.load("Fond/menu_background.png").convert()
             self.background_image = pg.transform.scale(self.background_image, (WIDTH, HEIGHT))
         except Exception as e:
             print(f"Erreur: Impossible de charger l'image de fond du menu: {e}")
@@ -138,10 +138,10 @@ class GameState(State):
 
         # Load the skyscape background image
         try:
-            self.background_image = pg.image.load("Fond/beautiful-skyscape-daytime_23-2149265589.jpg").convert()
+            self.background_image = pg.image.load("Fond/dark_forest.png").convert()
             self.background_image = pg.transform.scale(self.background_image, (WIDTH, HEIGHT))
         except Exception as e:
-            print(f"Erreur: Impossible de charger l'image de fond 'fond/skyscape.jpg': {e}")
+            print(f"Erreur: Impossible de charger l'image de fond 'fond/dark_forest.png': {e}")
             self.background_image = None
 
         self.gauge_rect = pg.Rect(WIDTH - 20, HEIGHT // 2 - 150, 20, 300)  # Stick to the right border
@@ -328,7 +328,7 @@ class GameState(State):
                         self.player.die()
                     break
         # --- Collision joueur-pics : lancer animation de mort ---
-        elif self.spikes and pg.sprite.spritecollideany(self.player, self.spikes):
+        if self.spikes and pg.sprite.spritecollideany(self.player, self.spikes):
             if not getattr(self.player, "is_dead", False):
                 self.player.die()
 
