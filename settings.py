@@ -6,7 +6,7 @@ HEIGHT = 600 # Hauteur de la fenêtre
 FPS = 60     # Images par seconde
 
 # Titre du jeu
-TITLE = "GetOnTopOfIt"
+TITLE = "Get On Top Of It"
 
 # Couleurs (format RGB)
 WHITE = (255, 255, 255)

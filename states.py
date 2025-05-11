@@ -55,6 +55,14 @@ class MenuState(State):
         self.title_font = pg.font.Font(None, 74)
         self.setup_buttons()
 
+        # Load the background image for the menu
+        try:
+            self.background_image = pg.image.load("Fond/GPT.png").convert()
+            self.background_image = pg.transform.scale(self.background_image, (WIDTH, HEIGHT))
+        except Exception as e:
+            print(f"Erreur: Impossible de charger l'image de fond du menu: {e}")
+            self.background_image = None
+
     def setup_buttons(self):
         button_width = 200
         button_height = 50
@@ -69,7 +77,7 @@ class MenuState(State):
         self.buttons.append(Button(
             WIDTH // 2 - button_width // 2, start_y + button_height + spacing,
             button_width, button_height,
-            "Options", self.open_settings, self.game.font  # Renamed to "Option"
+            "Options", self.open_settings, self.game.font
         ))
         self.buttons.append(Button(
             WIDTH // 2 - button_width // 2, start_y + 2 * (button_height + spacing),
@@ -96,10 +104,20 @@ class MenuState(State):
         # No need to handle music here
 
     def draw(self, surface):
-        super().draw(surface)
-        title_surf = self.title_font.render(TITLE, True, BLACK)
+        # Draw the background image if available
+        if self.background_image:
+            surface.blit(self.background_image, (0, 0))
+        else:
+            surface.fill(LIGHTBLUE)  # Fallback to light blue if the image fails to load
+
+        # Draw the title
+        title_surf = self.title_font.render(TITLE, True, WHITE)  # Change color to WHITE
         title_rect = title_surf.get_rect(center=(WIDTH // 2, HEIGHT // 4))
         surface.blit(title_surf, title_rect)
+
+        # Draw the buttons
+        for button in self.buttons:
+            button.draw(surface)
 
 
 class GameState(State):
