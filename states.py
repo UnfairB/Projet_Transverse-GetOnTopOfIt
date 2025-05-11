@@ -119,7 +119,7 @@ class GameState(State):
         self.music_playing = False
 
         # Altitude gauge properties
-        self.gauge_rect = pg.Rect(50, 50, 20, 300)  # Position and size of the gauge
+        self.gauge_rect = pg.Rect(WIDTH - 20, HEIGHT // 2 - 150, 20, 300)  # Stick to the right border
         self.gauge_color = (0, 255, 0)  # Green color for the gauge
         self.start_y = 6229  # Starting Y position
         self.end_y = 341  # Ending Y position
