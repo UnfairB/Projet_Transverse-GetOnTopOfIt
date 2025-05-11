@@ -11,7 +11,7 @@ class Monster(pg.sprite.Sprite):
         self.direction = 1  # 1 = droite, -1 = gauche
         self.animation_index = 0
         self.animation_timer = 0
-        self.animation_speed = 0.15  # Plus petit = plus rapide
+        self.animation_speed = 0.12  # Plus petit = plus rapide
 
     def update(self, dt):
         # Animation

@@ -104,14 +104,16 @@ class GameState(State):
         self.map = None
         self.camera = None
         self.javelins_flying = None
-        self.monsters = None  # Ajout pour groupe de monstres
+        self.monsters = None
+        self.spikes = None  # Ajout pour les pics
 
     def enter_state(self):
         super().enter_state()
         self.all_sprites = pg.sprite.Group()
         self.platforms = pg.sprite.Group()
         self.javelins_flying = pg.sprite.Group()
-        self.monsters = pg.sprite.Group()  # Initialisation du groupe de monstres
+        self.monsters = pg.sprite.Group()
+        self.spikes = pg.sprite.Group()  # Initialisation du groupe de pics
 
         map_file_path = ""
         try:
@@ -132,6 +134,24 @@ class GameState(State):
             return
 
         self.map.load_map_objects()
+
+        # --- Ajout : Charger les pics depuis la map avec une image ---
+        if hasattr(self.map, "tmx_data"):
+            try:
+                spike_img = pg.image.load("TileMap/picpic.png").convert_alpha()
+            except Exception as e:
+                print(f"Erreur chargement image pic: {e}")
+                spike_img = None
+            for layer in self.map.tmx_data.objectgroups:
+                for obj in layer:
+                    if obj.name == "picpic":
+                        spike_sprite = pg.sprite.Sprite()
+                        if spike_img:
+                            spike_sprite.image = pg.transform.scale(spike_img, (int(obj.width), int(obj.height)))
+                        else:
+                            spike_sprite.image = pg.Surface((obj.width, obj.height), pg.SRCALPHA)
+                        spike_sprite.rect = pg.Rect(obj.x, obj.y, obj.width, obj.height)
+                        self.spikes.add(spike_sprite)
 
         map_width_pixels, map_height_pixels = self.map.get_map_dimensions()
         self.camera = Camera(map_width_pixels, map_height_pixels)
@@ -158,9 +178,13 @@ class GameState(State):
             pg.image.load("Sprites/Zombie8.png").convert_alpha(),
         ]
         #différent positionnement de départ des zombies avec toutes leurs caractéristiques
-        zombie = Zombie(230, 4578, zombie_images, self.platforms, speed=80, walk_distance=130)
-        self.all_sprites.add(zombie)
-        self.monsters.add(zombie)  # Ajout au groupe de monstres
+        zombie1 = Zombie(235, 4570, zombie_images, self.platforms, speed=80, walk_distance=110)
+        zombie2 = Zombie(385, 1210, zombie_images, self.platforms, speed=80, walk_distance=225)
+        # Ajout des zombies au groupe de sprites
+        self.all_sprites.add(zombie1)
+        self.all_sprites.add(zombie2) 
+        self.monsters.add(zombie1)
+        self.monsters.add(zombie2) 
 
     def find_spawn_point(self):
         if not hasattr(self, 'map') or not self.map.tmx_data:
@@ -201,7 +225,9 @@ class GameState(State):
         # --- Collision joueur-monstre : recommencer la partie ---
         if self.monsters and pg.sprite.spritecollideany(self.player, self.monsters):
             self.manager.set_state("game")
-        # --- Fin ajout ---
+        # --- Collision joueur-pics : recommencer la partie ---
+        if self.spikes and pg.sprite.spritecollideany(self.player, self.spikes):
+            self.manager.set_state("game")
 
     def draw(self, surface):
         if not self.map or not self.camera or not self.all_sprites or not self.player:
@@ -218,6 +244,11 @@ class GameState(State):
         for sprite in self.all_sprites:
             if hasattr(sprite, 'image') and hasattr(sprite, 'rect'):
                 surface.blit(sprite.image, self.camera.apply(sprite.rect))
+
+        # --- Dessiner les pics ---
+        if self.spikes:
+            for spike in self.spikes:
+                surface.blit(spike.image, self.camera.apply(spike.rect))
 
         if self.game.font:
             player_world_x = self.player.rect.x
