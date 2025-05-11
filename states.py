@@ -46,6 +46,190 @@ class State:
         pass
 
 
+class IntroState(State):
+    """
+    État d'introduction avec texte défilant et bouton "passer l'intro".
+    """
+    def __init__(self, manager, game_instance):
+        super().__init__(manager, game_instance)
+        self.font = pg.font.Font(None, 36)
+        self.paragraphes = [
+            "La fête faisait rage sur le mont Olympe, un banquet où les dieux se lâchaient complètement, oubliant toute retenue.",
+            " Dionysos, le dieu du vin et de la fête, était au centre de l’attention, riant et plaisantant, tandis que les dieux se livraient à des excès de tous genres. Le vin coulait à flots, les mets se succédaient sans fin, et les danses étaient de plus en plus folles.",
+            " Mais pour Zeus, le roi des dieux, c’était trop. Il voyait ses pairs sombrer dans la démesure, et l’harmonie de l’Olympe s’effondrer sous le poids des excès. Son regard, habituellement sage, se faisait de plus en plus sombre. Une colère sourde montait en lui, alors que la fête de Dionysos devenait un chaos qu’il ne pouvait plus supporter."
+        ]
+        self.current_paragraph = 0
+        self.current_letter = 0
+        self.displayed_text = ""
+        self.last_update = pg.time.get_ticks()
+        self.letter_delay = 40  # ms
+        self.pause_time = 2000  # ms
+        self.paused = False
+        self.pause_start = 0
+        self.finished = False
+        self.skip_rect = pg.Rect(300, 500, 200, 50)
+        self.skip_hover = False
+
+    def enter_state(self):
+        self.current_paragraph = 0
+        self.current_letter = 0
+        self.displayed_text = ""
+        self.last_update = pg.time.get_ticks()
+        self.paused = False
+        self.pause_start = 0
+        self.finished = False
+
+    def handle_events(self, events):
+        for event in events:
+            if event.type == pg.QUIT:
+                self.game.running = False
+            elif event.type == pg.MOUSEBUTTONDOWN:
+                if self.skip_rect.collidepoint(event.pos):
+                    self.finished = True
+
+    def update(self, dt):
+        if self.finished:
+            self.manager.set_state("spawn")
+            return
+
+        now = pg.time.get_ticks()
+        if self.paused:
+            if now - self.pause_start >= self.pause_time:
+                self.paused = False
+                self.current_paragraph += 1
+                self.current_letter = 0
+                self.displayed_text = ""
+                self.last_update = now
+        elif self.current_paragraph < len(self.paragraphes):
+            paragraphe = self.paragraphes[self.current_paragraph]
+            if self.current_letter < len(paragraphe):
+                if now - self.last_update > self.letter_delay:
+                    self.displayed_text += paragraphe[self.current_letter]
+                    self.current_letter += 1
+                    self.last_update = now
+            else:
+                self.paused = True
+                self.pause_start = now
+        else:
+            # Fin de l'intro, bascule immédiatement sur "spawn"
+            self.finished = True
+
+    def draw(self, surface):
+        surface.fill((0, 0, 0))
+        # Affiche le texte centré, multi-lignes
+        self._draw_text(surface, self.displayed_text, self.font, (255,255,255), 100, 60)
+        # Bouton "passer l'intro"
+        mouse_pos = pg.mouse.get_pos()
+        self.skip_hover = self.skip_rect.collidepoint(mouse_pos)
+        color = (150,150,150) if self.skip_hover else (100,100,100)
+        pg.draw.rect(surface, color, self.skip_rect)
+        txt = self.font.render("Passer l'intro", True, (255,255,255))
+        txt_rect = txt.get_rect(center=self.skip_rect.center)
+        surface.blit(txt, txt_rect)
+
+    def _draw_text(self, ecran, texte, font, color, x, y):
+        largeur_max = WIDTH - 2 * x
+        mots = texte.split(' ')
+        lignes = []
+        ligne_actuelle = ""
+        for mot in mots:
+            test_ligne = f"{ligne_actuelle} {mot}".strip()
+            if font.size(test_ligne)[0] <= largeur_max:
+                ligne_actuelle = test_ligne
+            else:
+                lignes.append(ligne_actuelle)
+                ligne_actuelle = mot
+        if ligne_actuelle:
+            lignes.append(ligne_actuelle)
+        for ligne in lignes:
+            texte_surface = font.render(ligne, True, color)
+            texte_rect = texte_surface.get_rect(center=(WIDTH // 2, y))
+            ecran.blit(texte_surface, texte_rect)
+            y += font.get_linesize()
+
+
+class OutroState(State):
+    """
+    État de fin avec texte défilant et retour au menu.
+    """
+    def __init__(self, manager, game_instance):
+        super().__init__(manager, game_instance)
+        self.font = pg.font.Font(None, 36)
+        self.texte = (
+            "Après un long exil loin du Mont Olympe, Dionysos fit enfin son retour.\n"
+            "Le silence planait sur les cieux tandis qu’il s’avançait, le pas plus calme,\n"
+            "le regard moins enflammé qu’autrefois. Les dieux, d’abord figés, observaient,\n"
+            "partagés entre méfiance et nostalgie. Zeus, assis sur son trône, le fixa un instant\n"
+            "sans dire un mot. Puis, dans un souffle à peine audible, il hocha la tête.\n"
+            "L’Olympe pouvait de nouveau vibrer — non pas dans l’excès, mais dans l’équilibre retrouvé."
+        )
+        self.displayed_text = ""
+        self.current_letter = 0
+        self.last_update = pg.time.get_ticks()
+        self.letter_delay = 40  # ms
+        self.finished = False
+        self.pause_time = 2000  # ms
+        self.paused = False
+        self.pause_start = 0
+
+    def enter_state(self):
+        self.displayed_text = ""
+        self.current_letter = 0
+        self.last_update = pg.time.get_ticks()
+        self.finished = False
+        self.paused = False
+        self.pause_start = 0
+
+    def handle_events(self, events):
+        for event in events:
+            if event.type == pg.QUIT:
+                self.game.running = False
+
+    def update(self, dt):
+        if self.finished:
+            self.manager.set_state("menu")
+            return
+
+        now = pg.time.get_ticks()
+        if self.paused:
+            if now - self.pause_start >= self.pause_time:
+                self.finished = True
+        elif self.current_letter < len(self.texte):
+            if now - self.last_update > self.letter_delay:
+                self.displayed_text += self.texte[self.current_letter]
+                self.current_letter += 1
+                self.last_update = now
+        else:
+            # Fin du texte, pause avant retour menu
+            self.paused = True
+            self.pause_start = now
+
+    def draw(self, surface):
+        surface.fill((0, 0, 0))
+        self._draw_text(surface, self.displayed_text, self.font, (255,255,255), 100, 60)
+
+    def _draw_text(self, ecran, texte, font, color, x, y):
+        largeur_max = WIDTH - 2 * x
+        lignes = []
+        for ligne in texte.split('\n'):
+            mots = ligne.split(' ')
+            ligne_actuelle = ""
+            for mot in mots:
+                test_ligne = f"{ligne_actuelle} {mot}".strip()
+                if font.size(test_ligne)[0] <= largeur_max:
+                    ligne_actuelle = test_ligne
+                else:
+                    lignes.append(ligne_actuelle)
+                    ligne_actuelle = mot
+            if ligne_actuelle:
+                lignes.append(ligne_actuelle)
+        for ligne in lignes:
+            texte_surface = font.render(ligne, True, color)
+            texte_rect = texte_surface.get_rect(center=(WIDTH // 2, y))
+            ecran.blit(texte_surface, texte_rect)
+            y += font.get_linesize()
+
+
 class MenuState(State):
     """
     État du menu principal.
@@ -72,7 +256,7 @@ class MenuState(State):
         self.buttons.append(Button(
             WIDTH // 2 - button_width // 2, start_y,
             button_width, button_height,
-            "Jouer", self.start_game, self.game.font
+            "Jouer", self.start_intro, self.game.font
         ))
         self.buttons.append(Button(
             WIDTH // 2 - button_width // 2, start_y + button_height + spacing,
@@ -85,8 +269,8 @@ class MenuState(State):
             "Quitter", self.quit_game, self.game.font
         ))
 
-    def start_game(self):
-        self.manager.set_state("game")
+    def start_intro(self):
+        self.manager.set_state("intro")
 
     def open_settings(self):
         self.manager.set_state("option")
@@ -134,6 +318,8 @@ class GameState(State):
         self.javelins_flying = None
         self.monsters = None
         self.spikes = None  # Ajout pour les pics
+        self.portals = None  # Ajout pour les portails
+        self.portal_img = None
         self.music_playing = False
 
         # Load the skyscape background image
@@ -190,6 +376,14 @@ class GameState(State):
         self.javelins_flying = pg.sprite.Group()
         self.monsters = pg.sprite.Group()
         self.spikes = pg.sprite.Group()  # Initialisation du groupe de pics
+        self.portals = pg.sprite.Group()  # Initialisation du groupe de portails
+
+        # Charger l'image du portail
+        try:
+            self.portal_img = pg.image.load("Sprites/portail.png").convert_alpha()
+        except Exception as e:
+            print(f"Erreur chargement image portail: {e}")
+            self.portal_img = None
 
         map_file_path = ""
         try:
@@ -228,6 +422,19 @@ class GameState(State):
                             spike_sprite.image = pg.Surface((obj.width, obj.height), pg.SRCALPHA)
                         spike_sprite.rect = pg.Rect(obj.x, obj.y, obj.width, obj.height)
                         self.spikes.add(spike_sprite)
+
+        # Charger les objets portail_de_l'end
+        if hasattr(self.map, "tmx_data"):
+            for layer in self.map.tmx_data.objectgroups:
+                for obj in layer:
+                    if obj.name == "Portail_de_l'end":
+                        portal_sprite = pg.sprite.Sprite()
+                        if self.portal_img:
+                            portal_sprite.image = pg.transform.scale(self.portal_img, (int(obj.width), int(obj.height)))
+                        else:
+                            portal_sprite.image = pg.Surface((obj.width, obj.height), pg.SRCALPHA)
+                        portal_sprite.rect = pg.Rect(obj.x, obj.y, obj.width, obj.height)
+                        self.portals.add(portal_sprite)
 
         map_width_pixels, map_height_pixels = self.map.get_map_dimensions()
         self.camera = Camera(map_width_pixels, map_height_pixels)
@@ -332,6 +539,11 @@ class GameState(State):
             if not getattr(self.player, "is_dead", False):
                 self.player.die()
 
+        # Collision joueur-portail_de_l'end
+        if hasattr(self, "portals") and self.portals and pg.sprite.spritecollideany(self.player, self.portals):
+            self.manager.set_state("outro")
+            return
+
     def draw(self, surface):
         if not self.map or not self.camera or not self.all_sprites or not self.player:
             surface.fill(BLACK)
@@ -370,6 +582,12 @@ class GameState(State):
         if self.spikes:
             for spike in self.spikes:
                 surface.blit(spike.image, self.camera.apply(spike.rect))
+
+        # Dessiner le portail avec une image si disponible
+        if hasattr(self, "portals"):
+            for portal in self.portals:
+                if hasattr(portal, "TileMap/portail1.png"):
+                    surface.blit(portal.image, self.camera.apply(portal.rect))
 
         if self.game.font:
             player_world_x = self.player.rect.x
