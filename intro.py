@@ -83,7 +83,7 @@ def lancer_intro(ecran):
             dessiner_texte(ecran, displayed_texte, font, BLANC, 100, 60)
             draw_button(ecran, "Skip Intro", font, BLANC, button_rect, GRIS)
             pygame.display.flip()
-            clock.tick(50)
+            clock.tick(15)
 
         if running:
             pygame.time.wait(2000)
