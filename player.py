@@ -3,24 +3,34 @@ import pygame as pg
 from settings import *
 from javelin import Javelin
 
-
 #Toutes les images du personnage (animation)
-idle = ['Sprites/PersoIdleGauche.png',
-        'Sprites/PersoIdleDroite.png']
+idle = ['Sprites/L_Idle_Vagabond1.png',
+        'Sprites/R_Idle_Vagabond1.png']
 
-walking_droite = ['Sprites/PersoWalking11.png',
-           'Sprites/PersoWalking22.png',
-           'Sprites/PersoWalking33.png',
-           'Sprites/PersoWalking44.png',
-           'Sprites/PersoWalking55.png',
-           'Sprites/PersoWalking66.png']
+walking_droite = ['Sprites/WR_Vagabond1.png',
+           'Sprites/WR_Vagabond2.png',
+           'Sprites/WR_Vagabond3.png']
 
-walking_gauche = ['Sprites/PersoWalking1.png',
-                  'Sprites/PersoWalking2.png',
-                  'Sprites/PersoWalking3.png',
-                  'Sprites/PersoWalking4.png',
-                  'Sprites/PersoWalking5.png',
-                  'Sprites/PersoWalking6.png']
+walking_gauche = ['Sprites/WL_Vagabond1.png',
+                  'Sprites/WL_Vagabond2.png',
+                  'Sprites/WL_Vagabond3.png']
+
+idle_javelin = ['Sprites/L_Idle_Vagabaton1.png',
+                'Sprites/R_Idle_Vagabaton1.png']
+
+walking_droite_javelin = ['Sprites/RW_Vagabaton1.png',
+                        'Sprites/RW_Vagabaton2.png',
+                        'Sprites/RW_Vagabaton3.png']
+
+walking_gauche_javelin = ['Sprites/LW_Vagabaton1.png',
+                        'Sprites/LW_Vagabaton2.png',
+                        'Sprites/LW_Vagabaton3.png']
+
+jump_gauche = ['Sprites/L_Jump_Vagabond1.png']  
+jump_droite = ['Sprites/R_Jump_Vagabond1.png'] 
+
+jump_gauche_javelin = ['Sprites/L_Jump_Vagabaton1.png'] 
+jump_droite_javelin = ['Sprites/R_Jump_Vagabaton1.png'] 
 
 class Player(pg.sprite.Sprite):
     """
@@ -28,52 +38,63 @@ class Player(pg.sprite.Sprite):
     Hérite de pygame.sprite.Sprite.
     """
     def __init__(self, game, x, y):
-        """
-        Initialise le joueur.
-        :param game: Référence à l'objet principal du jeu.
-        :param x: Position x initiale du joueur.
-        :param y: Position y initiale du joueur.
-        """
         super().__init__()
         self.game = game
 
-        # Apparence du joueur - un simple rectangle bleu
-        player_sprite_width = TILE_SIZE // 2 
-        player_sprite_height = TILE_SIZE
-        self.image = pg.Surface((player_sprite_width, player_sprite_height))
-        self.image.fill(BLUE) # Utilise la couleur BLEU définie dans settings.py
+        # Animation
+        self.animations_no_javelin = {
+            "idle_gauche": [pg.image.load(idle[0]).convert_alpha()],
+            "idle_droite": [pg.image.load(idle[1]).convert_alpha()],
+            "walk_gauche": [pg.image.load(img).convert_alpha() for img in walking_gauche],
+            "walk_droite": [pg.image.load(img).convert_alpha() for img in walking_droite],
+            "jump_gauche": [pg.image.load(img).convert_alpha() for img in jump_gauche] if jump_gauche else [pg.image.load(idle[0]).convert_alpha()],
+            "jump_droite": [pg.image.load(img).convert_alpha() for img in jump_droite] if jump_droite else [pg.image.load(idle[1]).convert_alpha()],
+        }
+        self.animations_javelin = {
+            "idle_gauche": [pg.image.load(idle_javelin[0]).convert_alpha()],
+            "idle_droite": [pg.image.load(idle_javelin[1]).convert_alpha()],
+            "walk_gauche": [pg.image.load(img).convert_alpha() for img in walking_gauche_javelin],
+            "walk_droite": [pg.image.load(img).convert_alpha() for img in walking_droite_javelin],
+            "jump_gauche": [pg.image.load(img).convert_alpha() for img in jump_gauche_javelin] if jump_gauche_javelin else [pg.image.load(idle_javelin[0]).convert_alpha()],
+            "jump_droite": [pg.image.load(img).convert_alpha() for img in jump_droite_javelin] if jump_droite_javelin else [pg.image.load(idle_javelin[1]).convert_alpha()],
+        }
+        self.state = "idle_droite"  # idle_droite, idle_gauche, walk_droite, walk_gauche, jump_droite, jump_gauche
+        self.anim_index = 0
+        self.anim_timer = 0
+        self.anim_speed = 0.08  # secondes entre frames
 
+        self.image = self.animations_javelin["idle_droite"][0]
         self.rect = self.image.get_rect()
         self.rect.topleft = (x, y)
-        
+
         self.vel = pg.math.Vector2(0, 0)
         self.acc = pg.math.Vector2(0, 0)
         self.on_ground = False
-        
-        self.has_javelin = True # Le joueur commence avec un javelot
-        self.active_javelin_sprite = None # Référence au sprite du javelot lancé
+
+        self.has_javelin = True
+        self.active_javelin_sprite = None
+
+        self.facing = "droite"  # Pour savoir dans quel sens on regarde
 
     def jump(self):
-        """
-        Fait sauter le joueur s'il est sur le sol.
-        """
         if self.on_ground: 
             self.vel.y = PLAYER_JUMP_STRENGTH
 
     def update(self, dt):
-        """
-        Met à jour l'état du joueur à chaque frame (logique de mouvement, gravité, collisions).
-        :param dt: Delta-temps, temps écoulé depuis la dernière frame (non utilisé actuellement mais requis par la signature).
-        """
         self.acc = pg.math.Vector2(0, PLAYER_GRAVITY)
 
         keys = pg.key.get_pressed()
         current_acc_x = 0
+        moving = False
         if keys[pg.K_LEFT] or keys[pg.K_q]:
             current_acc_x = -PLAYER_SPEED 
+            self.facing = "gauche"
+            moving = True
         elif keys[pg.K_RIGHT] or keys[pg.K_d]:
             current_acc_x = PLAYER_SPEED
-        
+            self.facing = "droite"
+            moving = True
+
         self.vel.x = current_acc_x 
 
         self.rect.x += self.vel.x
@@ -82,26 +103,53 @@ class Player(pg.sprite.Sprite):
         self.vel.y += self.acc.y 
         if self.vel.y > 15: 
             self.vel.y = 15
-        
+
         self.rect.y += self.vel.y
-        
         self.on_ground = False 
         self.check_collision_y()
 
+        # --- Animation ---
+        # Détermine l'état d'animation selon le mouvement ET si le joueur saute
+        if not self.on_ground:
+            if self.facing == "droite":
+                self.state = "jump_droite"
+            else:
+                self.state = "jump_gauche"
+        elif moving:
+            if self.facing == "droite":
+                self.state = "walk_droite"
+            else:
+                self.state = "walk_gauche"
+        else:
+            if self.facing == "droite":
+                self.state = "idle_droite"
+            else:
+                self.state = "idle_gauche"
+
+        # Choix du bon set d'animations selon la possession du javelot
+        if self.has_javelin:
+            animations = self.animations_javelin
+        else:
+            animations = self.animations_no_javelin
+
+        self.anim_timer += dt
+        frames = animations[self.state]
+        if self.anim_timer > self.anim_speed:
+            self.anim_index = (self.anim_index + 1) % len(frames)
+            self.anim_timer = 0
+        # Pour idle, il n'y a qu'une frame donc anim_index reste 0
+        if len(frames) == 1:
+            self.anim_index = 0
+        self.image = frames[self.anim_index]
+        # --- Fin animation ---
+
     def throw_javelin(self, target_pos_world):
-        """
-        Logique pour que le joueur lance ou rappelle un javelot.
-        Appelé depuis GameState en réponse à un clic de souris.
-        :param target_pos_world: Coordonnées mondiales où le joueur vise.
-        """
         if self.has_javelin:
             print("Joueur lance un javelot.")
-            # game_state est accessible via self.game (qui est une instance de GameState)
             new_javelin = Javelin(self.game, self, target_pos_world)
-            self.game.all_sprites.add(new_javelin) # Pour le dessin et l'update général
-            if hasattr(self.game, 'javelins_flying'): # Assure que le groupe existe dans GameState
-                self.game.javelins_flying.add(new_javelin) # Pour une gestion spécifique des javelots en vol
-            
+            self.game.all_sprites.add(new_javelin)
+            if hasattr(self.game, 'javelins_flying'):
+                self.game.javelins_flying.add(new_javelin)
             self.has_javelin = False
             self.active_javelin_sprite = new_javelin
         elif self.active_javelin_sprite and self.active_javelin_sprite.state == 'stuck':
@@ -109,18 +157,11 @@ class Player(pg.sprite.Sprite):
             self.active_javelin_sprite.recall()
 
     def retrieve_javelin(self):
-        """
-        Appelé par le javelot lui-même lorsqu'il atteint le joueur pendant un rappel.
-        """
         print("Joueur a récupéré le javelot.")
         self.has_javelin = True
         self.active_javelin_sprite = None
-        # Le javelot se .kill() lui-même.
 
     def check_collision_x(self):
-        """
-        Vérifie et gère les collisions horizontales avec les plateformes.
-        """
         hits = pg.sprite.spritecollide(self, self.game.platforms, False)
         for hit_platform in hits:
             if self.vel.x > 0: 
@@ -130,9 +171,6 @@ class Player(pg.sprite.Sprite):
             self.vel.x = 0 
 
     def check_collision_y(self):
-        """
-        Vérifie et gère les collisions verticales avec les plateformes.
-        """
         hits = pg.sprite.spritecollide(self, self.game.platforms, False)
         for hit_platform in hits:
             if self.vel.y > 0:  
