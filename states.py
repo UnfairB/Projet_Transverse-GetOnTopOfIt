@@ -118,6 +118,43 @@ class GameState(State):
         self.spikes = None  # Ajout pour les pics
         self.music_playing = False
 
+        # Load the skyscape background image
+        try:
+            self.background_image = pg.image.load("Fond/beautiful-skyscape-daytime_23-2149265589.jpg").convert()
+            self.background_image = pg.transform.scale(self.background_image, (WIDTH, HEIGHT))
+        except Exception as e:
+            print(f"Erreur: Impossible de charger l'image de fond 'fond/skyscape.jpg': {e}")
+            self.background_image = None
+
+        self.gauge_rect = pg.Rect(WIDTH - 20, HEIGHT // 2 - 150, 20, 300)  # Stick to the right border
+        self.gauge_color = (0, 255, 0)  # Green color for the gauge
+        self.start_y = 6229  # Starting Y position
+        self.end_y = 341  # Ending Y position
+
+    def draw_altitude_gauge(self, surface):
+        """
+        Draws the altitude gauge on the screen.
+        """
+        # Calculate the fill percentage based on the player's Y position
+        if self.player:
+            player_y = self.player.rect.y
+            fill_percentage = max(0, min(1, (self.start_y - player_y) / (self.start_y - self.end_y)))
+
+            # Calculate the height of the filled portion
+            filled_height = int(self.gauge_rect.height * fill_percentage)
+
+            # Draw the empty gauge
+            pg.draw.rect(surface, (0, 0, 0), self.gauge_rect, 2)  # Black border
+
+            # Draw the filled portion
+            filled_rect = pg.Rect(
+                self.gauge_rect.x,
+                self.gauge_rect.y + self.gauge_rect.height - filled_height,
+                self.gauge_rect.width,
+                filled_height
+            )
+            pg.draw.rect(surface, self.gauge_color, filled_rect)
+
     def enter_state(self):
         super().enter_state()
         # Start playing the music when entering the game state
@@ -207,6 +244,8 @@ class GameState(State):
         self.monsters.add(zombie1)
         self.monsters.add(zombie2) 
 
+        self._player_dead = False  # Flag pour bloquer le jeu pendant la mort
+
     def exit_state(self):
         super().exit_state()
         # Stop the music when exiting the game state
@@ -225,6 +264,9 @@ class GameState(State):
 
     def handle_events(self, events):
         super().handle_events(events)
+        # Bloque toutes les entrées si le joueur est en train de mourir
+        if self.player and getattr(self.player, "is_dead", False):
+            return
         for event in events:
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_SPACE or event.key == pg.K_UP or event.key == pg.K_z:
@@ -232,9 +274,6 @@ class GameState(State):
                         self.player.jump()
                 if event.key == pg.K_ESCAPE:
                     self.manager.push_state("pause")
-                if event.key == pg.K_LSHIFT or event.key == pg.K_RSHIFT:
-                    if self.player and self.player.active_javelin_sprite:
-                        self.player.active_javelin_sprite.recall()
 
             if event.type == pg.MOUSEBUTTONDOWN:
                 if event.button == 1:
@@ -245,22 +284,35 @@ class GameState(State):
 
     def update(self, dt):
         super().update(dt)
-        # Dynamically update the volume of the music
+        # Augmente dynamique le volume de la musique
         if self.music_playing:
             pg.mixer.music.set_volume(GAME_VOLUME)
 
         if not self.player or not self.camera or not self.all_sprites:
             return
 
+        # Si le joueur est en train de mourir, ne rien mettre à jour d'autre que lui
+        if getattr(self.player, "is_dead", False):
+            self.player.update(dt)
+            self.camera.update(self.player.rect)
+            return
+
         self.all_sprites.update(dt)
         self.camera.update(self.player.rect)
 
-        # --- Collision joueur-monstre : recommencer la partie ---
-        if self.monsters and pg.sprite.spritecollideany(self.player, self.monsters):
-            self.manager.set_state("game")
-        # --- Collision joueur-pics : recommencer la partie ---
-        if self.spikes and pg.sprite.spritecollideany(self.player, self.spikes):
-            self.manager.set_state("game")
+        # --- Collision joueur-monstre : lancer animation de mort ---
+        if self.monsters:
+            for monster in list(self.monsters):
+                if getattr(monster, "is_dead", False):
+                    continue
+                if pg.sprite.collide_rect(self.player, monster):
+                    if not getattr(self.player, "is_dead", False):
+                        self.player.die()
+                    break
+        # --- Collision joueur-pics : lancer animation de mort ---
+        elif self.spikes and pg.sprite.spritecollideany(self.player, self.spikes):
+            if not getattr(self.player, "is_dead", False):
+                self.player.die()
 
     def draw(self, surface):
         if not self.map or not self.camera or not self.all_sprites or not self.player:
@@ -271,14 +323,32 @@ class GameState(State):
                 surface.blit(err_surf, err_rect)
             return
 
-        surface.fill(LIGHTBLUE)
+        # Scale the background image for scrolling
+        if self.background_image:
+            scaled_height = HEIGHT * 2  # Make the background image twice the screen height
+            scaled_width = int(self.background_image.get_width() * (scaled_height / self.background_image.get_height()))
+            scaled_background = pg.transform.scale(self.background_image, (scaled_width, scaled_height))
+
+            # Calculate the vertical offset based on the player's Y position
+            player_y = self.player.rect.y
+            max_offset = scaled_height - HEIGHT  # Maximum scrollable height
+
+            # Reverse the offset logic: start at the bottom of the image and scroll up as the player climbs
+            offset_y = max(0, min(max_offset, (player_y - self.end_y) / (self.start_y - self.end_y) * max_offset))
+
+            # Draw the background image with the calculated offset
+            surface.blit(scaled_background, (0, -offset_y))
+        else:
+            surface.fill(LIGHTBLUE)
+
+        # Draw the map and game elements
         self.map.render(surface, self.camera)
 
         for sprite in self.all_sprites:
             if hasattr(sprite, 'image') and hasattr(sprite, 'rect'):
                 surface.blit(sprite.image, self.camera.apply(sprite.rect))
 
-        # --- Dessiner les pics ---
+        # --- Draw spikes ---
         if self.spikes:
             for spike in self.spikes:
                 surface.blit(spike.image, self.camera.apply(spike.rect))
@@ -290,6 +360,12 @@ class GameState(State):
             text_surface = self.game.font.render(coord_text, True, BLACK)
             surface.blit(text_surface, (10, 10))
 
+        # Draw the altitude gauge
+        self.draw_altitude_gauge(surface)
+
+    # Méthode appelée par Player à la fin de l'animation de mort
+    def go_to_main_menu(self):
+        self.manager.set_state("menu")
 
 class PauseState(State):
     """
