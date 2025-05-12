@@ -587,13 +587,6 @@ class GameState(State):
             for portal in self.portals:
                 surface.blit(portal.image, self.camera.apply(portal.rect))
 
-        if self.game.font:
-            player_world_x = self.player.rect.x
-            player_world_y = self.player.rect.y
-            coord_text = f"Player X: {int(player_world_x)}, Y: {int(player_world_y)}"
-            text_surface = self.game.font.render(coord_text, True, BLACK)
-            surface.blit(text_surface, (10, 10))
-
         # Dessiner les javelots
         self.draw_altitude_gauge(surface)
 
