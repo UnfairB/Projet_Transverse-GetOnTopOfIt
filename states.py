@@ -378,13 +378,6 @@ class GameState(State):
         self.spikes = pg.sprite.Group()  # Initialisation du groupe de pics
         self.portals = pg.sprite.Group()  # Initialisation du groupe de portails
 
-        # Charger l'image du portail
-        try:
-            self.portal_img = pg.image.load("Sprites/portail.png").convert_alpha()
-        except Exception as e:
-            print(f"Erreur chargement image portail: {e}")
-            self.portal_img = None
-
         map_file_path = ""
         try:
             base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -425,6 +418,12 @@ class GameState(State):
 
         # Charger les objets portail_de_l'end
         if hasattr(self.map, "tmx_data"):
+            # Charger l'image du portail
+            try:
+                self.portal_img = pg.image.load("TileMap/portail1.png").convert_alpha()
+            except Exception as e:
+                print(f"Erreur chargement image portail: {e}")
+                self.portal_img = None
             for layer in self.map.tmx_data.objectgroups:
                 for obj in layer:
                     if obj.name == "Portail_de_l'end":
@@ -584,10 +583,9 @@ class GameState(State):
                 surface.blit(spike.image, self.camera.apply(spike.rect))
 
         # Dessiner le portail avec une image si disponible
-        if hasattr(self, "portals"):
+        if self.portals:
             for portal in self.portals:
-                if hasattr(portal, "TileMap/portail1.png"):
-                    surface.blit(portal.image, self.camera.apply(portal.rect))
+                surface.blit(portal.image, self.camera.apply(portal.rect))
 
         if self.game.font:
             player_world_x = self.player.rect.x
